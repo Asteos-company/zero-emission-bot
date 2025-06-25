@@ -121,6 +121,21 @@
             border: none;
         }
     </style>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script>
+  const tg = window.Telegram.WebApp;
+  
+  // Активируем полноэкранный режим
+  tg.expand();
+  
+  // Опционально: скрываем стандартную кнопку "Назад"
+  tg.BackButton.hide();
+  
+  // При закрытии через кнопку в вашем интерфейсе
+  function closeApp() {
+    tg.close();
+  }
+</script>
 </head>
 <body>
     <div class="container">
