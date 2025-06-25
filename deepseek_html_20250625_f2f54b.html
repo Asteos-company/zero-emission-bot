@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zero Emission Games</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: white;
+            min-height: 100vh;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #0088cc;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+        .btn-games {
+            background-color: #34b7f1;
+            color: white;
+        }
+        .btn-games:hover {
+            background-color: #2aa7e1;
+        }
+        .btn-support {
+            background-color: #f1c40f;
+            color: white;
+        }
+        .btn-support:hover {
+            background-color: #e1b40e;
+        }
+        .btn-back {
+            background-color: #e74c3c;
+            color: white;
+            margin-top: 20px;
+        }
+        .btn-back:hover {
+            background-color: #c0392b;
+        }
+        .logo {
+            width: 80px;
+            height: 80px;
+            display: block;
+            margin: 0 auto 20px;
+        }
+        .games-list {
+            display: none;
+            margin-top: 20px;
+        }
+        .game-item {
+            padding: 15px;
+            margin: 10px 0;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-left: 4px solid #34b7f1;
+        }
+        .game-item:hover {
+            background-color: #eaf7fd;
+            transform: translateX(5px);
+        }
+        .game-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #2c3e50;
+        }
+        .game-description {
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+        .fullscreen-game {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: white;
+            z-index: 1000;
+            display: none;
+        }
+        .close-game {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 20px;
+            cursor: pointer;
+            z-index: 1001;
+        }
+        .game-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="https://telegram.org/img/t_logo.png" alt="Zero Emission Logo" class="logo">
+        <h1>Zero Emission</h1>
+        
+        <div id="main-menu">
+            <button class="btn btn-games" onclick="showGames()">Play Games</button>
+            <button class="btn btn-support" onclick="contactSupport()">Contact Support</button>
+        </div>
+        
+        <div id="games-list" class="games-list">
+            <div class="game-item" onclick="openGame('https://ellisonleao.github.io/clumsy-bird/')">
+                <div class="game-title">Clumsy Bird</div>
+                <div class="game-description">Flappy Bird clone with cute graphics</div>
+            </div>
+            
+            <div class="game-item" onclick="openGame('https://pacman.platzh1rsch.ch/')">
+                <div class="game-title">Pacman in Canvas</div>
+                <div class="game-description">Classic Pacman game with modern controls</div>
+            </div>
+            
+            <div class="game-item" onclick="openGame('https://codeincomplete.com/games/racer/v4-final/')">
+                <div class="game-title">Pseudo 3D Racer</div>
+                <div class="game-description">Retro-style 3D racing game</div>
+            </div>
+            
+            <button class="btn btn-back" onclick="hideGames()">Back to Menu</button>
+        </div>
+    </div>
+    
+    <div id="fullscreen-game" class="fullscreen-game">
+        <button class="close-game" onclick="closeGame()">×</button>
+        <iframe id="game-iframe" class="game-iframe" allowfullscreen></iframe>
+    </div>
+
+    <script>
+        function showGames() {
+            document.getElementById('main-menu').style.display = 'none';
+            document.getElementById('games-list').style.display = 'block';
+        }
+        
+        function hideGames() {
+            document.getElementById('games-list').style.display = 'none';
+            document.getElementById('main-menu').style.display = 'block';
+        }
+        
+        function openGame(url) {
+            document.getElementById('game-iframe').src = url;
+            document.getElementById('fullscreen-game').style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeGame() {
+            document.getElementById('fullscreen-game').style.display = 'none';
+            document.getElementById('game-iframe').src = '';
+            document.body.style.overflow = 'auto';
+        }
+        
+        function contactSupport() {
+            // Здесь можно реализовать открытие чата поддержки
+            alert("Support contact feature will be implemented here");
+            // window.location.href = "https://t.me/your_support_bot";
+        }
+    </script>
+</body>
+</html>
