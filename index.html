@@ -1,63 +1,139 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Zero Emission</title>
-    <script src="https://telegram.org/js/telegram-web-app.js?v=3"></script>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
+        :root {
+            --tg-bg: var(--tg-theme-bg-color, #ffffff);
+            --tg-text: var(--tg-theme-text-color, #000000);
+            --tg-button: var(--tg-theme-button-color, #34b7f1);
+            --tg-button-text: var(--tg-theme-button-text-color, #ffffff);
+        }
+        
         body {
             margin: 0;
-            padding: 20px;
+            padding: 0;
             font-family: -apple-system, sans-serif;
-            background: var(--tg-theme-bg-color, #ffffff);
-            color: var(--tg-theme-text-color, #000000);
-            height: 100vh;
+            background: var(--tg-bg);
+            color: var(--tg-text);
+            min-height: 100vh;
+        }
+        
+        .container {
+            padding: 20px;
             box-sizing: border-box;
         }
-        #game-btn {
+        
+        .btn {
             display: block;
             width: 100%;
             padding: 15px;
-            background: var(--tg-theme-button-color, #34b7f1);
-            color: var(--tg-theme-button-text-color, #fff);
+            margin: 10px 0;
+            background: var(--tg-button);
+            color: var(--tg-button-text);
             border: none;
             border-radius: 10px;
             font-size: 16px;
             text-align: center;
             cursor: pointer;
         }
+        
+        .game-list {
+            display: none;
+        }
+        
+        .game-item {
+            padding: 15px;
+            margin: 10px 0;
+            background: var(--tg-secondary-bg, #f0f0f0);
+            border-radius: 8px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
-    <button id="game-btn">PLAY GAME</button>
+    <div class="container" id="main-menu">
+        <h1>Zero Emission</h1>
+        <button class="btn" id="play-btn">PLAY GAMES</button>
+        <button class="btn" id="support-btn">CONTACT SUPPORT</button>
+    </div>
+    
+    <div class="container game-list" id="games-menu">
+        <div class="game-item" data-url="https://ellisonleao.github.io/clumsy-bird/">
+            Clumsy Bird
+        </div>
+        <div class="game-item" data-url="https://pacman.platzh1rsch.ch/">
+            Pacman
+        </div>
+        <div class="game-item" data-url="https://codeincomplete.com/games/racer/v4-final/">
+            3D Racer
+        </div>
+        <button class="btn" id="back-btn">BACK</button>
+    </div>
 
     <script>
-        // 1. Ждём полной инициализации API
-        function init() {
+        // Инициализация Telegram WebApp
+        document.addEventListener('DOMContentLoaded', function() {
             const tg = window.Telegram?.WebApp;
-            if (!tg) {
-                console.error("Telegram WebApp not loaded");
-                return;
-            }
-
-            // 2. Форсируем полноэкранный режим
-            tg.expand();
-            tg.enableClosingConfirmation();
             
-            // 3. Критически важный вызов!
-            tg.ready();
-
-            // 4. Открываем игру при клике
-            document.getElementById('game-btn').onclick = () => {
-                tg.openLink('https://ellisonleao.github.io/clumsy-bird/', {
-                    try_instant_view: true
+            if (tg) {
+                // 1. Принудительно разворачиваем на весь экран
+                tg.expand();
+                
+                // 2. Настраиваем кнопку "Назад" в Telegram
+                tg.BackButton.onClick(showMainMenu);
+                
+                // 3. Сообщаем Telegram, что приложение готово
+                tg.ready();
+            }
+            
+            // Элементы интерфейса
+            const playBtn = document.getElementById('play-btn');
+            const supportBtn = document.getElementById('support-btn');
+            const backBtn = document.getElementById('back-btn');
+            const mainMenu = document.getElementById('main-menu');
+            const gamesMenu = document.getElementById('games-menu');
+            const gameItems = document.querySelectorAll('.game-item');
+            
+            // Обработчики событий
+            playBtn.addEventListener('click', showGamesMenu);
+            supportBtn.addEventListener('click', contactSupport);
+            backBtn.addEventListener('click', showMainMenu);
+            
+            gameItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const gameUrl = this.getAttribute('data-url');
+                    if (tg) {
+                        tg.openLink(gameUrl, { try_instant_view: true });
+                    } else {
+                        window.open(gameUrl, '_blank');
+                    }
                 });
-            };
-        }
-
-        // Запускаем с задержкой для надёжности
-        setTimeout(init, 100);
+            });
+            
+            function showGamesMenu() {
+                mainMenu.style.display = 'none';
+                gamesMenu.style.display = 'block';
+                if (tg) tg.BackButton.show();
+            }
+            
+            function showMainMenu() {
+                gamesMenu.style.display = 'none';
+                mainMenu.style.display = 'block';
+                if (tg) tg.BackButton.hide();
+            }
+            
+            function contactSupport() {
+                if (tg) {
+                    tg.openTelegramLink('https://t.me/your_support');
+                } else {
+                    alert('Contact @your_support in Telegram');
+                }
+            }
+        });
     </script>
 </body>
 </html>
