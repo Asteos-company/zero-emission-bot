@@ -1,77 +1,174 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zero Emission</title>
-    <script src="https://telegram.org/js/telegram-web-app.js?v=6"></script>
+    <meta name="telegram:webview_version" content="2.0">
+    <title>Zero Emission Games</title>
+    <script src="https://telegram.org/js/telegram-web-app-2.0.js"></script>
     <style>
+        :root {
+            --tg-bg: var(--tg-theme-bg-color, #ffffff);
+            --tg-text: var(--tg-theme-text-color, #222222);
+            --tg-button: var(--tg-theme-button-color, #34b7f1);
+            --tg-secondary: var(--tg-theme-secondary-bg-color, #f4f4f4);
+        }
+        
         body {
             margin: 0;
-            padding: 20px;
-            font-family: -apple-system, sans-serif;
-            background: var(--tg-theme-bg-color, #ffffff);
-            color: var(--tg-theme-text-color, #000000);
+            padding: 16px;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--tg-bg);
+            color: var(--tg-text);
             min-height: 100vh;
             box-sizing: border-box;
         }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        
         .btn {
             display: block;
             width: 100%;
-            padding: 15px;
-            margin: 10px 0;
-            background: var(--tg-theme-button-color, #34b7f1);
-            color: var(--tg-theme-button-text-color, #ffffff);
+            padding: 14px;
+            margin: 12px 0;
             border: none;
-            border-radius: 10px;
+            border-radius: 12px;
             font-size: 16px;
+            font-weight: 500;
             text-align: center;
+            background: var(--tg-button);
+            color: var(--tg-theme-button-text-color, #fff);
             cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .btn:active {
+            transform: scale(0.96);
+        }
+        
+        .btn-support {
+            background: var(--tg-secondary);
+            color: var(--tg-text);
+        }
+        
+        .game-item {
+            padding: 16px;
+            margin: 10px 0;
+            background: var(--tg-secondary);
+            border-radius: 10px;
+            cursor: pointer;
+        }
+        
+        .hidden {
+            display: none;
         }
     </style>
 </head>
 <body>
-    <div id="app">
-        <button class="btn" id="game-btn">PLAY GAME</button>
+    <div id="main-menu">
+        <div class="header">
+            <h1>Zero Emission</h1>
+            <p>Выберите действие:</p>
+        </div>
+        
+        <button id="games-btn" class="btn">🎮 Играть</button>
+        <button id="support-btn" class="btn btn-support">💬 Поддержка</button>
+    </div>
+    
+    <div id="games-menu" class="hidden">
+        <div class="header">
+            <h2>Выберите игру</h2>
+        </div>
+        
+        <div class="game-item" data-game="clumsy-bird">
+            Clumsy Bird
+        </div>
+        
+        <div class="game-item" data-game="pacman">
+            Pacman
+        </div>
+        
+        <div class="game-item" data-game="racer">
+            3D Racer
+        </div>
+        
+        <button id="back-btn" class="btn">← Назад</button>
     </div>
 
     <script>
-        // 1. Инициализация Telegram WebApp
-        function initTelegram() {
+        // Инициализация Telegram WebApp
+        document.addEventListener('DOMContentLoaded', () => {
             const tg = window.Telegram?.WebApp;
-            if (!tg) return false;
             
-            // 2. Форсируем полноэкранный режим
-            tg.expand();
-            
-            // 3. Фикс для iOS
-            if (tg.platform === 'ios') {
-                document.body.style.minHeight = '100vh';
-                document.documentElement.style.minHeight = '100vh';
+            if (tg) {
+                // Настройка интерфейса
+                tg.expand();
+                tg.setHeaderColor('secondary_bg');
+                tg.ready();
+                
+                // Обработчик кнопки "Назад" в Telegram
+                tg.onEvent('backButtonClicked', showMainMenu);
             }
             
-            // 4. Важно: сообщаем о готовности
-            tg.ready();
-            return true;
-        }
-
-        // 5. Запускаем с задержкой для надёжности
-        setTimeout(() => {
-            if (!initTelegram()) {
-                console.log("Running in browser mode");
+            // Элементы интерфейса
+            const gamesBtn = document.getElementById('games-btn');
+            const supportBtn = document.getElementById('support-btn');
+            const backBtn = document.getElementById('back-btn');
+            const gameItems = document.querySelectorAll('.game-item');
+            
+            // Обработчики событий
+            gamesBtn.addEventListener('click', showGamesMenu);
+            supportBtn.addEventListener('click', contactSupport);
+            backBtn.addEventListener('click', showMainMenu);
+            
+            gameItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    const game = item.getAttribute('data-game');
+                    openGame(game);
+                });
+            });
+            
+            // Функции
+            function showGamesMenu() {
+                document.getElementById('main-menu').classList.add('hidden');
+                document.getElementById('games-menu').classList.remove('hidden');
+                if (tg) tg.BackButton.show();
             }
             
-            // 6. Обработчик кнопки
-            document.getElementById('game-btn').onclick = () => {
-                if (window.Telegram?.WebApp?.openLink) {
-                    Telegram.WebApp.openLink('https://ellisonleao.github.io/clumsy-bird/', {
-                        try_instant_view: true
+            function showMainMenu() {
+                document.getElementById('games-menu').classList.add('hidden');
+                document.getElementById('main-menu').classList.remove('hidden');
+                if (tg) tg.BackButton.hide();
+            }
+            
+            function contactSupport() {
+                if (tg) {
+                    tg.openTelegramLink('https://t.me/your_support_bot');
+                } else {
+                    window.open('https://t.me/your_support_bot', '_blank');
+                }
+            }
+            
+            function openGame(game) {
+                const urls = {
+                    'clumsy-bird': 'https://ellisonleao.github.io/clumsy-bird/',
+                    'pacman': 'https://pacman.platzh1rsch.ch/',
+                    'racer': 'https://codeincomplete.com/games/racer/v4-final/'
+                };
+                
+                if (tg) {
+                    tg.openLink(urls[game], { 
+                        try_instant_view: true,
+                        instant_view_theme: tg.colorScheme 
                     });
                 } else {
-                    window.open('https://ellisonleao.github.io/clumsy-bird/', '_blank');
+                    window.open(urls[game], '_blank');
                 }
-            };
-        }, 100);
+            }
+        });
     </script>
 </body>
 </html>
