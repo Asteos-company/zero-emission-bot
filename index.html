@@ -1,174 +1,274 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="telegram:webview_version" content="2.0">
     <title>Zero Emission Games</title>
-    <script src="https://telegram.org/js/telegram-web-app-2.0.js"></script>
+    <script src="https://telegram.org/js/game.js"></script>
     <style>
-        :root {
-            --tg-bg: var(--tg-theme-bg-color, #ffffff);
-            --tg-text: var(--tg-theme-text-color, #222222);
-            --tg-button: var(--tg-theme-button-color, #34b7f1);
-            --tg-secondary: var(--tg-theme-secondary-bg-color, #f4f4f4);
-        }
-        
         body {
             margin: 0;
-            padding: 16px;
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--tg-bg);
-            color: var(--tg-text);
-            min-height: 100vh;
-            box-sizing: border-box;
-        }
-        
-        .header {
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background: var(--tg-theme-bg-color, #f5f5f5);
+            color: var(--tg-theme-text-color, #333);
             text-align: center;
-            margin-bottom: 24px;
+            height: 100vh;
+            overflow: hidden;
         }
-        
         .btn {
             display: block;
-            width: 100%;
-            padding: 14px;
-            margin: 12px 0;
+            width: 90%;
+            max-width: 300px;
+            margin: 15px auto;
+            padding: 12px;
+            background: var(--tg-theme-button-color, #34b7f1);
+            color: var(--tg-theme-button-text-color, white);
             border: none;
-            border-radius: 12px;
+            border-radius: 8px;
             font-size: 16px;
-            font-weight: 500;
-            text-align: center;
-            background: var(--tg-button);
-            color: var(--tg-theme-button-text-color, #fff);
             cursor: pointer;
-            transition: transform 0.2s;
+            transition: background 0.3s;
         }
-        
-        .btn:active {
-            transform: scale(0.96);
+        .btn:hover {
+            background: var(--tg-theme-secondary-bg-color, #2aa7e1);
         }
-        
         .btn-support {
-            background: var(--tg-secondary);
-            color: var(--tg-text);
+            background: var(--tg-theme-link-color, #f1c40f);
         }
-        
-        .game-item {
-            padding: 16px;
-            margin: 10px 0;
-            background: var(--tg-secondary);
-            border-radius: 10px;
-            cursor: pointer;
-        }
-        
-        .hidden {
+        .game-container {
             display: none;
+            height: calc(100vh - 60px);
+            overflow: hidden;
+        }
+        canvas {
+            background: #222;
+            margin: 10px auto;
+            display: block;
+            max-width: 100%;
+            max-height: calc(100vh - 100px);
+        }
+        h1, h2 {
+            color: var(--tg-theme-text-color, #333);
+            margin: 10px 0;
         }
     </style>
 </head>
 <body>
-    <div id="main-menu">
-        <div class="header">
-            <h1>Zero Emission</h1>
-            <p>Выберите действие:</p>
-        </div>
-        
-        <button id="games-btn" class="btn">🎮 Играть</button>
-        <button id="support-btn" class="btn btn-support">💬 Поддержка</button>
-    </div>
-    
-    <div id="games-menu" class="hidden">
-        <div class="header">
-            <h2>Выберите игру</h2>
-        </div>
-        
-        <div class="game-item" data-game="clumsy-bird">
-            Clumsy Bird
-        </div>
-        
-        <div class="game-item" data-game="pacman">
-            Pacman
-        </div>
-        
-        <div class="game-item" data-game="racer">
-            3D Racer
-        </div>
-        
-        <button id="back-btn" class="btn">← Назад</button>
-    </div>
+<div id="menu">
+    <h1>Zero Emission Games</h1>
+    <button id="play-btn" class="btn">🎮 Играть в игры</button>
+    <button id="support-btn" class="btn btn-support">💬 Связаться с поддержкой</button>
+</div>
 
-    <script>
-        // Инициализация Telegram WebApp
-        document.addEventListener('DOMContentLoaded', () => {
-            const tg = window.Telegram?.WebApp;
-            
-            if (tg) {
-                // Настройка интерфейса
-                tg.expand();
-                tg.setHeaderColor('secondary_bg');
-                tg.ready();
-                
-                // Обработчик кнопки "Назад" в Telegram
-                tg.onEvent('backButtonClicked', showMainMenu);
+<div id="games-menu" class="game-container">
+    <h2>Выберите игру:</h2>
+    <button id="game1-btn" class="btn">Clumsy Bird</button>
+    <button id="game2-btn" class="btn">Pacman</button>
+    <button id="game3-btn" class="btn">3D Racer</button>
+    <button id="back-btn" class="btn">← Назад</button>
+</div>
+
+<div id="game1" class="game-container">
+    <h2>Clumsy Bird</h2>
+    <canvas id="bird-canvas" width="300" height="400"></canvas>
+    <button id="back-to-menu1" class="btn">← В меню</button>
+</div>
+
+<div id="game2" class="game-container">
+    <h2>Pacman</h2>
+    <canvas id="pacman-canvas" width="300" height="400"></canvas>
+    <button id="back-to-menu2" class="btn">← В меню</button>
+</div>
+
+<div id="game3" class="game-container">
+    <h2>3D Racer</h2>
+    <canvas id="racer-canvas" width="300" height="400"></canvas>
+    <button id="back-to-menu3" class="btn">← В меню</button>
+</div>
+
+<script>
+    // Инициализация Telegram WebApp
+    const tg = window.Telegram.WebApp;
+    tg.expand(); // Развернуть на весь экран
+
+    // Элементы интерфейса
+    const menu = document.getElementById('menu');
+    const gamesMenu = document.getElementById('games-menu');
+    const game1 = document.getElementById('game1');
+    const game2 = document.getElementById('game2');
+    const game3 = document.getElementById('game3');
+
+    // Обработчики кнопок
+    document.getElementById('play-btn').onclick = () => {
+        menu.style.display = 'none';
+        gamesMenu.style.display = 'block';
+    };
+
+    document.getElementById('support-btn').onclick = () => {
+        tg.openTelegramLink('https://t.me/your_support');
+    };
+
+    document.getElementById('back-btn').onclick = () => {
+        gamesMenu.style.display = 'none';
+        menu.style.display = 'block';
+        hideAllGames();
+    };
+
+    // Обработчики выбора игр
+    document.getElementById('game1-btn').onclick = () => {
+        gamesMenu.style.display = 'none';
+        game1.style.display = 'block';
+        initBirdGame();
+    };
+
+    document.getElementById('game2-btn').onclick = () => {
+        gamesMenu.style.display = 'none';
+        game2.style.display = 'block';
+        initPacmanGame();
+    };
+
+    document.getElementById('game3-btn').onclick = () => {
+        gamesMenu.style.display = 'none';
+        game3.style.display = 'block';
+        initRacerGame();
+    };
+
+    // Кнопки возврата в меню
+    document.getElementById('back-to-menu1').onclick = () => {
+        game1.style.display = 'none';
+        menu.style.display = 'block';
+    };
+
+    document.getElementById('back-to-menu2').onclick = () => {
+        game2.style.display = 'none';
+        menu.style.display = 'block';
+    };
+
+    document.getElementById('back-to-menu3').onclick = () => {
+        game3.style.display = 'none';
+        menu.style.display = 'block';
+    };
+
+    // Скрыть все игры
+    function hideAllGames() {
+        game1.style.display = 'none';
+        game2.style.display = 'none';
+        game3.style.display = 'none';
+    }
+
+    // Простейшая реализация Clumsy Bird
+    function initBirdGame() {
+        const canvas = document.getElementById('bird-canvas');
+        const ctx = canvas.getContext('2d');
+        let birdY = 200;
+        let velocity = 0;
+        let gravity = 0.5;
+        let score = 0;
+        let gameOver = false;
+
+        function update() {
+            if (gameOver) return;
+
+            ctx.clearRect(0, 0, 300, 400);
+
+            // Птица
+            ctx.fillStyle = '#f1c40f';
+            ctx.fillRect(100, birdY, 30, 30);
+
+            // Физика
+            velocity += gravity;
+            birdY += velocity;
+
+            // Проверка столкновений
+            if (birdY > 400 || birdY < 0) {
+                gameOver = true;
+                showGameOver();
+                return;
             }
-            
-            // Элементы интерфейса
-            const gamesBtn = document.getElementById('games-btn');
-            const supportBtn = document.getElementById('support-btn');
-            const backBtn = document.getElementById('back-btn');
-            const gameItems = document.querySelectorAll('.game-item');
-            
-            // Обработчики событий
-            gamesBtn.addEventListener('click', showGamesMenu);
-            supportBtn.addEventListener('click', contactSupport);
-            backBtn.addEventListener('click', showMainMenu);
-            
-            gameItems.forEach(item => {
-                item.addEventListener('click', () => {
-                    const game = item.getAttribute('data-game');
-                    openGame(game);
-                });
-            });
-            
-            // Функции
-            function showGamesMenu() {
-                document.getElementById('main-menu').classList.add('hidden');
-                document.getElementById('games-menu').classList.remove('hidden');
-                if (tg) tg.BackButton.show();
-            }
-            
-            function showMainMenu() {
-                document.getElementById('games-menu').classList.add('hidden');
-                document.getElementById('main-menu').classList.remove('hidden');
-                if (tg) tg.BackButton.hide();
-            }
-            
-            function contactSupport() {
-                if (tg) {
-                    tg.openTelegramLink('https://t.me/your_support_bot');
-                } else {
-                    window.open('https://t.me/your_support_bot', '_blank');
-                }
-            }
-            
-            function openGame(game) {
-                const urls = {
-                    'clumsy-bird': 'https://ellisonleao.github.io/clumsy-bird/',
-                    'pacman': 'https://pacman.platzh1rsch.ch/',
-                    'racer': 'https://codeincomplete.com/games/racer/v4-final/'
-                };
-                
-                if (tg) {
-                    tg.openLink(urls[game], { 
-                        try_instant_view: true,
-                        instant_view_theme: tg.colorScheme 
-                    });
-                } else {
-                    window.open(urls[game], '_blank');
-                }
-            }
-        });
-    </script>
-</body>
-</html>
+
+            // Управление
+            canvas.onclick = () => {
+                velocity = -10;
+                score++;
+            };
+
+            // Очки
+            ctx.fillStyle = '#fff';
+            ctx.font = '20px Arial';
+            ctx.fillText(`Очки: ${score}`, 10, 30);
+
+            requestAnimationFrame(update);
+        }
+
+        function showGameOver() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+            ctx.fillRect(0, 0, 300, 400);
+            ctx.fillStyle = '#fff';
+            ctx.font = '30px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('Игра окончена!', 150, 180);
+            ctx.fillText(`Очки: ${score}`, 150, 220);
+            ctx.font = '20px Arial';
+            ctx.fillText('Нажмите для рестарта', 150, 260);
+
+            canvas.onclick = () => {
+                birdY = 200;
+                velocity = 0;
+                score = 0;
+                gameOver = false;
+                update();
+            };
+        }
+
+        update();
+    }
+
+    // Реализация Pacman
+    function initPacmanGame() {
+        const canvas = document.getElementById('pacman-canvas');
+        const ctx = canvas.getContext('2d');
+        let pacmanX = 150;
+        let score = 0;
+
+        function update() {
+            ctx.clearRect(0, 0, 300, 400);
+
+            // Пакман
+            ctx.fillStyle = '#f1c40f';
+            ctx.beginPath();
+            ctx.arc(pacmanX, 200, 20, 0.2 * Math.PI, 1.8 * Math.PI);
+            ctx.lineTo(pacmanX, 200);
+            ctx.fill();
+
+            // Очки
+            ctx.fillStyle = '#fff';
+            ctx.font = '20px Arial';
+            ctx.fillText(`Очки: ${score}`, 10, 30);
+
+            pacmanX = (pacmanX + 3) % 300;
+            score++;
+            requestAnimationFrame(update);
+        }
+
+        update();
+    }
+
+    // Реализация 3D Racer
+    function initRacerGame() {
+        const canvas = document.getElementById('racer-canvas');
+        const ctx = canvas.getContext('2d');
+        let roadOffset = 0;
+        let score = 0;
+
+        function update() {
+            ctx.clearRect(0, 0, 300, 400);
+
+            // Дорога
+            ctx.fillStyle = '#555';
+            ctx.fillRect(0, 0, 300, 400);
+
+            // Разметка
+            ctx.fillStyle = '#fff';
+            for (let y = -50; y < 450; y += 100) {
+                ctx.fillRect(140, y + roadOffset, 20, 50);
