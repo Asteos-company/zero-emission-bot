@@ -3,272 +3,239 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zero Emission Games</title>
+    <title>Space Jumper</title>
     <script src="https://telegram.org/js/game.js"></script>
     <style>
         body {
             margin: 0;
             padding: 0;
-            font-family: Arial, sans-serif;
-            background: var(--tg-theme-bg-color, #f5f5f5);
-            color: var(--tg-theme-text-color, #333);
-            text-align: center;
-            height: 100vh;
             overflow: hidden;
+            background: #000;
+            touch-action: manipulation;
+            font-family: Arial, sans-serif;
+        }
+        #game-container {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+        }
+        canvas {
+            display: block;
+            background: #000;
+            margin: 0 auto;
+        }
+        #menu, #game-over {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            text-align: center;
+            width: 80%;
+            max-width: 300px;
         }
         .btn {
             display: block;
-            width: 90%;
-            max-width: 300px;
-            margin: 15px auto;
+            width: 100%;
             padding: 12px;
-            background: var(--tg-theme-button-color, #34b7f1);
-            color: var(--tg-theme-button-text-color, white);
+            margin: 10px 0;
+            background: #34b7f1;
+            color: white;
             border: none;
             border-radius: 8px;
             font-size: 16px;
             cursor: pointer;
-            transition: background 0.3s;
         }
-        .btn:hover {
-            background: var(--tg-theme-secondary-bg-color, #2aa7e1);
-        }
-        .btn-support {
-            background: var(--tg-theme-link-color, #f1c40f);
-        }
-        .game-container {
+        #game-over {
             display: none;
-            height: calc(100vh - 60px);
-            overflow: hidden;
-        }
-        canvas {
-            background: #222;
-            margin: 10px auto;
-            display: block;
-            max-width: 100%;
-            max-height: calc(100vh - 100px);
-        }
-        h1, h2 {
-            color: var(--tg-theme-text-color, #333);
-            margin: 10px 0;
         }
     </style>
 </head>
 <body>
-<div id="menu">
-    <h1>Zero Emission Games</h1>
-    <button id="play-btn" class="btn">🎮 Играть в игры</button>
-    <button id="support-btn" class="btn btn-support">💬 Связаться с поддержкой</button>
-</div>
+    <div id="game-container">
+        <div id="menu">
+            <h1>Space Jumper</h1>
+            <button id="start-btn" class="btn">🚀 Start Game</button>
+            <button id="support-btn" class="btn">💬 Support</button>
+        </div>
+        
+        <canvas id="gameCanvas" width="300" height="500"></canvas>
+        
+        <div id="game-over">
+            <h2>Game Over!</h2>
+            <p>Score: <span id="score">0</span></p>
+            <button id="restart-btn" class="btn">🔄 Restart</button>
+        </div>
+    </div>
 
-<div id="games-menu" class="game-container">
-    <h2>Выберите игру:</h2>
-    <button id="game1-btn" class="btn">Clumsy Bird</button>
-    <button id="game2-btn" class="btn">Pacman</button>
-    <button id="game3-btn" class="btn">3D Racer</button>
-    <button id="back-btn" class="btn">← Назад</button>
-</div>
+    <script>
+        // Telegram WebApp initialization
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.enableClosingConfirmation();
 
-<div id="game1" class="game-container">
-    <h2>Clumsy Bird</h2>
-    <canvas id="bird-canvas" width="300" height="400"></canvas>
-    <button id="back-to-menu1" class="btn">← В меню</button>
-</div>
-
-<div id="game2" class="game-container">
-    <h2>Pacman</h2>
-    <canvas id="pacman-canvas" width="300" height="400"></canvas>
-    <button id="back-to-menu2" class="btn">← В меню</button>
-</div>
-
-<div id="game3" class="game-container">
-    <h2>3D Racer</h2>
-    <canvas id="racer-canvas" width="300" height="400"></canvas>
-    <button id="back-to-menu3" class="btn">← В меню</button>
-</div>
-
-<script>
-    // Инициализация Telegram WebApp
-    const tg = window.Telegram.WebApp;
-    tg.expand(); // Развернуть на весь экран
-
-    // Элементы интерфейса
-    const menu = document.getElementById('menu');
-    const gamesMenu = document.getElementById('games-menu');
-    const game1 = document.getElementById('game1');
-    const game2 = document.getElementById('game2');
-    const game3 = document.getElementById('game3');
-
-    // Обработчики кнопок
-    document.getElementById('play-btn').onclick = () => {
-        menu.style.display = 'none';
-        gamesMenu.style.display = 'block';
-    };
-
-    document.getElementById('support-btn').onclick = () => {
-        tg.openTelegramLink('https://t.me/your_support');
-    };
-
-    document.getElementById('back-btn').onclick = () => {
-        gamesMenu.style.display = 'none';
-        menu.style.display = 'block';
-        hideAllGames();
-    };
-
-    // Обработчики выбора игр
-    document.getElementById('game1-btn').onclick = () => {
-        gamesMenu.style.display = 'none';
-        game1.style.display = 'block';
-        initBirdGame();
-    };
-
-    document.getElementById('game2-btn').onclick = () => {
-        gamesMenu.style.display = 'none';
-        game2.style.display = 'block';
-        initPacmanGame();
-    };
-
-    document.getElementById('game3-btn').onclick = () => {
-        gamesMenu.style.display = 'none';
-        game3.style.display = 'block';
-        initRacerGame();
-    };
-
-    // Кнопки возврата в меню
-    document.getElementById('back-to-menu1').onclick = () => {
-        game1.style.display = 'none';
-        menu.style.display = 'block';
-    };
-
-    document.getElementById('back-to-menu2').onclick = () => {
-        game2.style.display = 'none';
-        menu.style.display = 'block';
-    };
-
-    document.getElementById('back-to-menu3').onclick = () => {
-        game3.style.display = 'none';
-        menu.style.display = 'block';
-    };
-
-    // Скрыть все игры
-    function hideAllGames() {
-        game1.style.display = 'none';
-        game2.style.display = 'none';
-        game3.style.display = 'none';
-    }
-
-    // Простейшая реализация Clumsy Bird
-    function initBirdGame() {
-        const canvas = document.getElementById('bird-canvas');
+        // Game elements
+        const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-        let birdY = 200;
-        let velocity = 0;
-        let gravity = 0.5;
+        const menu = document.getElementById('menu');
+        const gameOverScreen = document.getElementById('game-over');
+        const scoreElement = document.getElementById('score');
+        
+        // Game variables
+        let player = {
+            x: 50,
+            y: 250,
+            width: 30,
+            height: 30,
+            velocityY: 0,
+            gravity: 0.4,
+            jumpForce: -10
+        };
+        
+        let platforms = [];
         let score = 0;
-        let gameOver = false;
+        let gameRunning = false;
+        let animationId;
 
-        function update() {
-            if (gameOver) return;
+        // Initialize game
+        function initGame() {
+            // Set canvas size
+            resizeCanvas();
+            
+            // Reset game state
+            player = {
+                x: 50,
+                y: 250,
+                width: 30,
+                height: 30,
+                velocityY: 0,
+                gravity: 0.4,
+                jumpForce: -10
+            };
+            
+            platforms = [];
+            score = 0;
+            
+            // Create initial platforms
+            for (let i = 0; i < 5; i++) {
+                platforms.push({
+                    x: Math.random() * (canvas.width - 70),
+                    y: canvas.height - (i * 150),
+                    width: 70,
+                    height: 15
+                });
+            }
+            
+            // Start game
+            gameRunning = true;
+            menu.style.display = 'none';
+            gameOverScreen.style.display = 'none';
+            gameLoop();
+        }
 
-            ctx.clearRect(0, 0, 300, 400);
-
-            // Птица
-            ctx.fillStyle = '#f1c40f';
-            ctx.fillRect(100, birdY, 30, 30);
-
-            // Физика
-            velocity += gravity;
-            birdY += velocity;
-
-            // Проверка столкновений
-            if (birdY > 400 || birdY < 0) {
-                gameOver = true;
-                showGameOver();
+        // Game loop
+        function gameLoop() {
+            if (!gameRunning) return;
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Update player
+            player.velocityY += player.gravity;
+            player.y += player.velocityY;
+            
+            // Check platform collisions
+            let onPlatform = false;
+            platforms.forEach(platform => {
+                // Draw platform
+                ctx.fillStyle = '#2ecc71';
+                ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
+                
+                // Check collision
+                if (player.y + player.height >= platform.y && 
+                    player.y <= platform.y + platform.height &&
+                    player.x + player.width >= platform.x && 
+                    player.x <= platform.x + platform.width &&
+                    player.velocityY > 0) {
+                    player.velocityY = player.jumpForce;
+                    onPlatform = true;
+                    score++;
+                }
+                
+                // Move platform down
+                platform.y += 3;
+            });
+            
+            // Generate new platforms
+            if (platforms[0].y > canvas.height) {
+                platforms.shift();
+                platforms.push({
+                    x: Math.random() * (canvas.width - 70),
+                    y: platforms[platforms.length-1].y - 150,
+                    width: 70,
+                    height: 15
+                });
+            }
+            
+            // Draw player
+            ctx.fillStyle = '#3498db';
+            ctx.fillRect(player.x, player.y, player.width, player.height);
+            
+            // Draw score
+            ctx.fillStyle = '#fff';
+            ctx.font = '20px Arial';
+            ctx.fillText(`Score: ${score}`, 20, 30);
+            
+            // Game over conditions
+            if (player.y > canvas.height) {
+                endGame();
                 return;
             }
-
-            // Управление
-            canvas.onclick = () => {
-                velocity = -10;
-                score++;
-            };
-
-            // Очки
-            ctx.fillStyle = '#fff';
-            ctx.font = '20px Arial';
-            ctx.fillText(`Очки: ${score}`, 10, 30);
-
-            requestAnimationFrame(update);
+            
+            animationId = requestAnimationFrame(gameLoop);
         }
 
-        function showGameOver() {
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-            ctx.fillRect(0, 0, 300, 400);
-            ctx.fillStyle = '#fff';
-            ctx.font = '30px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText('Игра окончена!', 150, 180);
-            ctx.fillText(`Очки: ${score}`, 150, 220);
-            ctx.font = '20px Arial';
-            ctx.fillText('Нажмите для рестарта', 150, 260);
-
-            canvas.onclick = () => {
-                birdY = 200;
-                velocity = 0;
-                score = 0;
-                gameOver = false;
-                update();
-            };
+        // End game
+        function endGame() {
+            gameRunning = false;
+            cancelAnimationFrame(animationId);
+            scoreElement.textContent = score;
+            gameOverScreen.style.display = 'block';
+            
+            // Send score to bot
+            if (typeof Telegram !== 'undefined') {
+                tg.sendData(JSON.stringify({ action: 'game_over', score: score }));
+            }
         }
 
-        update();
-    }
-
-    // Реализация Pacman
-    function initPacmanGame() {
-        const canvas = document.getElementById('pacman-canvas');
-        const ctx = canvas.getContext('2d');
-        let pacmanX = 150;
-        let score = 0;
-
-        function update() {
-            ctx.clearRect(0, 0, 300, 400);
-
-            // Пакман
-            ctx.fillStyle = '#f1c40f';
-            ctx.beginPath();
-            ctx.arc(pacmanX, 200, 20, 0.2 * Math.PI, 1.8 * Math.PI);
-            ctx.lineTo(pacmanX, 200);
-            ctx.fill();
-
-            // Очки
-            ctx.fillStyle = '#fff';
-            ctx.font = '20px Arial';
-            ctx.fillText(`Очки: ${score}`, 10, 30);
-
-            pacmanX = (pacmanX + 3) % 300;
-            score++;
-            requestAnimationFrame(update);
+        // Resize canvas
+        function resizeCanvas() {
+            canvas.width = window.innerWidth > 400 ? 400 : window.innerWidth;
+            canvas.height = window.innerHeight > 600 ? 600 : window.innerHeight;
         }
 
-        update();
-    }
+        // Event listeners
+        document.getElementById('start-btn').addEventListener('click', initGame);
+        document.getElementById('restart-btn').addEventListener('click', initGame);
+        document.getElementById('support-btn').addEventListener('click', () => {
+            tg.openTelegramLink('https://t.me/your_support');
+        });
+        
+        canvas.addEventListener('click', () => {
+            if (gameRunning) {
+                player.velocityY = player.jumpForce;
+            }
+        });
 
-    // Реализация 3D Racer
-    function initRacerGame() {
-        const canvas = document.getElementById('racer-canvas');
-        const ctx = canvas.getContext('2d');
-        let roadOffset = 0;
-        let score = 0;
+        window.addEventListener('resize', resizeCanvas);
 
-        function update() {
-            ctx.clearRect(0, 0, 300, 400);
-
-            // Дорога
-            ctx.fillStyle = '#555';
-            ctx.fillRect(0, 0, 300, 400);
-
-            // Разметка
-            ctx.fillStyle = '#fff';
-            for (let y = -50; y < 450; y += 100) {
-                ctx.fillRect(140, y + roadOffset, 20, 50);
+        // Initialize when Telegram is ready
+        if (typeof Telegram !== 'undefined') {
+            tg.ready();
+        } else {
+            // For testing outside Telegram
+            resizeCanvas();
+        }
+    </script>
+</body>
+</html>
