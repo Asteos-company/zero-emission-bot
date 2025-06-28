@@ -2,119 +2,134 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="telegram:game" content="flappy_bird">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Flappy Bird</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
+        :root {
+            --tg-theme-bg-color: #70c5ce;
+            --tg-theme-text-color: #ffffff;
+            --tg-viewport-height: 100vh;
+        }
+        
         body {
             margin: 0;
             padding: 0;
-            position: fixed;
-            width: 100%;
-            height: 100%;
+            width: 100vw;
+            height: var(--tg-viewport-height);
             overflow: hidden;
-            font-family: Arial, sans-serif;
-            background: #70c5ce;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--tg-theme-bg-color);
+            color: var(--tg-theme-text-color);
             touch-action: manipulation;
+            position: fixed;
         }
+        
         #app {
-            position: absolute;
             width: 100%;
             height: 100%;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
         }
-        #menu {
-            text-align: center;
-            width: 100%;
-            max-width: 400px;
-            padding: 20px;
-        }
-        h1 {
-            color: #fff;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-            margin-bottom: 30px;
-            font-size: 2.2rem;
-        }
+        
         .btn {
-            display: block;
-            width: 100%;
-            margin: 15px 0;
-            padding: 16px;
+            width: 280px;
+            height: 52px;
+            margin: 12px 0;
+            border-radius: 26px;
             border: none;
-            border-radius: 12px;
-            font-size: 1.1rem;
-            font-weight: bold;
+            font-size: 17px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
             transition: transform 0.1s;
+            -webkit-tap-highlight-color: transparent;
         }
+        
         .btn:active {
             transform: scale(0.96);
         }
+        
         .btn-play {
-            background: linear-gradient(to right, #f1c40f, #e67e22);
+            background: linear-gradient(135deg, #FF9500, #FF5E00);
             color: white;
+            box-shadow: 0 4px 0 #CC4B00;
         }
+        
         .btn-support {
-            background: linear-gradient(to right, #3498db, #2980b9);
+            background: linear-gradient(135deg, #007AFF, #0040FF);
             color: white;
+            box-shadow: 0 4px 0 #002ECC;
         }
     </style>
 </head>
 <body>
     <div id="app">
-        <div id="menu">
-            <h1>Flappy Bird</h1>
-            <button class="btn btn-play" id="playBtn">Играть в игру</button>
-            <button class="btn btn-support" id="supportBtn">Связаться с поддержкой</button>
-        </div>
+        <h1 style="font-size: 28px; font-weight: 600; margin-bottom: 32px;">Flappy Bird</h1>
+        <button class="btn btn-play" id="playBtn">Играть в игру</button>
+        <button class="btn btn-support" id="supportBtn">Связаться с поддержкой</button>
     </div>
 
     <script>
         // 1. Инициализация Telegram WebApp
         const tg = window.Telegram.WebApp;
         
-        // 2. Запрос полноэкранного режима (новый метод 2025)
-        function requestFullscreen() {
-            if (tg.platform !== 'unknown' && tg.isExpanded === false) {
-                tg.web_app_request_fullscreen()
-                    .then(() => {
-                        console.log('Fullscreen granted');
-                        initApp();
-                    })
-                    .catch((error) => {
-                        console.error('Fullscreen error:', error);
-                        initApp();
-                    });
-            } else {
-                initApp();
+        // 2. Адаптация под iOS
+        function setupIOS() {
+            if (tg.platform === 'ios') {
+                document.documentElement.style.setProperty(
+                    '--tg-viewport-height', 
+                    `${window.innerHeight}px`
+                );
+                
+                // Фикс для iPhone Notch
+                const app = document.getElementById('app');
+                app.style.paddingTop = 'env(safe-area-inset-top)';
+                app.style.paddingBottom = 'env(safe-area-inset-bottom)';
             }
         }
         
-        // 3. Инициализация приложения
-        function initApp() {
-            tg.enableClosingConfirmation();
-            tg.MainButton.hide();
-            tg.BackButton.hide();
-            tg.setHeaderColor('#70c5ce');
-            tg.setBackgroundColor('#70c5ce');
-            
-            // Обработчики кнопок
-            document.getElementById('playBtn').addEventListener('click', () => {
-                tg.showAlert('Игра скоро будет доступна!');
-            });
-            
-            document.getElementById('supportBtn').addEventListener('click', () => {
-                tg.openTelegramLink('https://t.me/your_support_bot');
-            });
+        // 3. Полноэкранный режим
+        function expandApp() {
+            if (!tg.isExpanded) {
+                tg.expand();
+                setTimeout(() => {
+                    tg.enableClosingConfirmation();
+                    tg.BackButton.hide();
+                }, 300);
+            }
         }
         
-        // 4. Запуск при готовности
+        // 4. Инициализация
         tg.ready();
-        requestFullscreen();
+        setupIOS();
+        expandApp();
+        
+        // 5. Обработчики событий
+        document.getElementById('playBtn').addEventListener('click', () => {
+            tg.showAlert('Игра в разработке!');
+        });
+        
+        document.getElementById('supportBtn').addEventListener('click', () => {
+            tg.openTelegramLink('https://t.me/your_support');
+        });
+        
+        // 6. Фикс ресайза на iOS
+        window.addEventListener('resize', () => {
+            if (tg.platform === 'ios') {
+                document.documentElement.style.setProperty(
+                    '--tg-viewport-height', 
+                    `${window.innerHeight}px`
+                );
+            }
+        });
     </script>
 </body>
 </html>
