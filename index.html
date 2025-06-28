@@ -17,7 +17,7 @@
             font-family: -apple-system, BlinkMacSystemFont, sans-serif;
             background: #70c5ce;
             position: fixed;
-            touch-action: none; /* Отключаем все жесты касания */
+            touch-action: none;
         }
         #app {
             width: 100%;
@@ -59,10 +59,10 @@
     <script>
         const tg = window.Telegram.WebApp;
         
-        // Функция для активации полноэкранного режима
         function activateFullscreen() {
-            // Запрещаем свайп вниз для закрытия
+            // Убираем стрелочку вниз и запрещаем свайп для закрытия
             tg.enableClosingConfirmation();
+            tg.setHeaderColor('secondary_bg_color'); // Используем цвет фона
             
             // Основной метод для полноэкранного режима
             if (tg.requestFullscreen) {
@@ -71,10 +71,9 @@
                 tg.expand();
             }
             
-            // Настраиваем интерфейс Telegram
+            // Скрываем кнопки интерфейса Telegram
             tg.BackButton.hide();
             tg.MainButton.hide();
-            tg.setHeaderColor('#70c5ce');
             tg.setBackgroundColor('#70c5ce');
             
             // Фикс для iOS
@@ -85,10 +84,10 @@
             }
         }
 
-        // Инициализация (без задержки)
+        // Инициализация
         document.addEventListener('DOMContentLoaded', () => {
             tg.ready();
-            activateFullscreen(); // Активируем сразу без задержки
+            activateFullscreen();
             
             // Блокируем жесты прокрутки
             document.body.addEventListener('touchmove', (e) => {
