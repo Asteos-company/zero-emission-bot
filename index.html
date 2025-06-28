@@ -2,20 +2,181 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Space Jumper</title>
-    <script src="https://telegram.org/js/play-sdk.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Telegram Flappy</title>
+    <script src="https://telegram.org/js/telegram-game-api.js"></script>
     <style>
-        body { margin: 0; background: #000; }
-        canvas { display: block; width: 100%; height: 100vh; }
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: #000;
+            touch-action: manipulation;
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100vh;
+        }
+        #score {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            font-family: Arial;
+            font-size: 24px;
+            z-index: 100;
+        }
     </style>
 </head>
 <body>
+    <div id="score">0</div>
     <canvas id="game"></canvas>
+
     <script>
-        const play = new Telegram.Play('space_jumper');
-        play.ready(() => {
-            const canvas = document.getElementById('game');
-            // Game code here...
+        // 1. Инициализация Telegram Game API
+        const tgGame = new Telegram.Game('telegram_flappy', {
+            api_version: '6.3',
+            fullscreen: true
+        });
+
+        // 2. Настройка игры
+        const canvas = document.getElementById('game');
+        const ctx = canvas.getContext('2d');
+        const scoreElement = document.getElementById('score');
+        
+        // Размеры
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
+        // Игровые переменные
+        const bird = {
+            x: 100,
+            y: canvas.height/2,
+            radius: 20,
+            gravity: 0.5,
+            velocity: 0,
+            jump: -10
+        };
+        
+        const pipes = [];
+        let score = 0;
+        let gameOver = false;
+        let frameCount = 0;
+
+        // 3. Игровой цикл
+        function gameLoop() {
+            if (gameOver) return;
+            
+            // Очистка
+            ctx.fillStyle = '#70c5ce';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Птица
+            bird.velocity += bird.gravity;
+            bird.y += bird.velocity;
+            
+            ctx.fillStyle = '#ff0';
+            ctx.beginPath();
+            ctx.arc(bird.x, bird.y, bird.radius, 0, Math.PI*2);
+            ctx.fill();
+            
+            // Трубы
+            if (frameCount % 120 === 0) {
+                const gap = 200;
+                const height = 100 + Math.random()*(canvas.height - gap - 100);
+                
+                pipes.push({
+                    x: canvas.width,
+                    topHeight: height,
+                    bottomY: height + gap,
+                    width: 80,
+                    passed: false
+                });
+            }
+            
+            // Отрисовка и проверка столкновений
+            for (let i = 0; i < pipes.length; i++) {
+                const pipe = pipes[i];
+                
+                // Верхняя труба
+                ctx.fillStyle = '#0a0';
+                ctx.fillRect(pipe.x, 0, pipe.width, pipe.topHeight);
+                
+                // Нижняя труба
+                ctx.fillRect(pipe.x, pipe.bottomY, pipe.width, canvas.height - pipe.bottomY);
+                
+                // Движение
+                pipe.x -= 2;
+                
+                // Проверка столкновений
+                if (
+                    (bird.x + bird.radius > pipe.x && bird.x - bird.radius < pipe.x + pipe.width) &&
+                    (bird.y - bird.radius < pipe.topHeight || bird.y + bird.radius > pipe.bottomY)
+                ) {
+                    endGame();
+                }
+                
+                // Подсчет очков
+                if (!pipe.passed && bird.x > pipe.x + pipe.width) {
+                    pipe.passed = true;
+                    score++;
+                    scoreElement.textContent = score;
+                }
+            }
+            
+            // Удаление труб за пределами экрана
+            if (pipes.length > 0 && pipes[0].x < -pipes[0].width) {
+                pipes.shift();
+            }
+            
+            // Проверка границ
+            if (bird.y + bird.radius > canvas.height || bird.y - bird.radius < 0) {
+                endGame();
+            }
+            
+            frameCount++;
+            requestAnimationFrame(gameLoop);
+        }
+        
+        // 4. Обработка кликов
+        canvas.addEventListener('click', () => {
+            if (gameOver) {
+                resetGame();
+            } else {
+                bird.velocity = bird.jump;
+            }
+        });
+        
+        // 5. Завершение игры
+        function endGame() {
+            gameOver = true;
+            tgGame.submitScore(score);
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.fillStyle = '#fff';
+            ctx.font = '30px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('Game Over!', canvas.width/2, canvas.height/2);
+            ctx.fillText(`Score: ${score}`, canvas.width/2, canvas.height/2 + 40);
+        }
+        
+        // 6. Сброс игры
+        function resetGame() {
+            bird.y = canvas.height/2;
+            bird.velocity = 0;
+            pipes.length = 0;
+            score = 0;
+            scoreElement.textContent = '0';
+            gameOver = false;
+            frameCount = 0;
+            gameLoop();
+        }
+        
+        // 7. Запуск при готовности
+        tgGame.ready(() => {
+            gameLoop();
         });
     </script>
 </body>
