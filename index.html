@@ -58,56 +58,228 @@
         .hidden {
             display: none;
         }
-        iframe {
-            border: none;
+        #gameCanvas {
+            display: block;
             width: 100%;
             height: 100vh;
+            background: #70c5ce;
         }
     </style>
 </head>
 <body>
     <div class="container" id="menu">
         <h1>Flappy Bird</h1>
-        <button class="btn btn-play" id="playBtn">🕹️ Играть в игру123</button>
+        <button class="btn btn-play" id="playBtn">🕹️ Играть в игру</button>
         <button class="btn btn-support" id="supportBtn">💬 Связаться с поддержкой</button>
     </div>
 
-    <iframe id="gameFrame" class="hidden" src="about:blank"></iframe>
+    <canvas id="gameCanvas" class="hidden"></canvas>
 
     <script>
-        // Инициализация Telegram WebApp
+        // 1. Инициализация Telegram WebApp
         const tg = window.Telegram.WebApp;
+        const game = new Telegram.Game('flappy_bird', {
+            api_version: '6.3',
+            fullscreen: true,
+            monetization: 'free'
+        });
+        
         tg.expand();
         tg.enableClosingConfirmation();
 
-        // Элементы интерфейса
+        // 2. Элементы интерфейса
         const menu = document.getElementById('menu');
-        const gameFrame = document.getElementById('gameFrame');
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
         const playBtn = document.getElementById('playBtn');
         const supportBtn = document.getElementById('supportBtn');
 
-        // Обработчики кнопок
-        playBtn.addEventListener('click', () => {
-            menu.classList.add('hidden');
-            gameFrame.classList.remove('hidden');
-            gameFrame.src = "https://ellisonleao.github.io/clumsy-bird/";
+        // 3. Основные параметры игры
+        const bird = {
+            x: 50,
+            y: canvas.height/2,
+            radius: 20,
+            gravity: 0.5,
+            velocity: 0,
+            jump: -10,
+            color: '#f1c40f'
+        };
+
+        const pipes = [];
+        let score = 0;
+        let gameActive = false;
+        let animationFrameId;
+
+        // 4. Функция создания платформ
+        function createPipes() {
+            const gap = 150;
+            const height = Math.random() * (canvas.height - gap - 100) + 50;
             
-            // Отслеживание завершения игры
-            window.addEventListener('message', (event) => {
-                if (event.data === 'game_complete') {
-                    menu.classList.remove('hidden');
-                    gameFrame.classList.add('hidden');
-                    gameFrame.src = "about:blank";
+            pipes.push({
+                x: canvas.width,
+                topHeight: height,
+                bottomY: height + gap,
+                width: 80,
+                passed: false
+            });
+        }
+
+        // 5. Игровой цикл
+        function gameLoop() {
+            if (!gameActive) return;
+            
+            // Очистка canvas
+            ctx.fillStyle = '#70c5ce';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Обновление позиции птицы
+            bird.velocity += bird.gravity;
+            bird.y += bird.velocity;
+            
+            // Отрисовка птицы
+            ctx.fillStyle = bird.color;
+            ctx.beginPath();
+            ctx.arc(bird.x, bird.y, bird.radius, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Отрисовка и проверка труб
+            for (let i = 0; i < pipes.length; i++) {
+                const pipe = pipes[i];
+                
+                // Верхняя труба
+                ctx.fillStyle = '#2ecc71';
+                ctx.fillRect(pipe.x, 0, pipe.width, pipe.topHeight);
+                
+                // Нижняя труба
+                ctx.fillRect(pipe.x, pipe.bottomY, pipe.width, canvas.height - pipe.bottomY);
+                
+                // Движение труб
+                pipe.x -= 2;
+                
+                // Проверка столкновений
+                if (
+                    bird.x + bird.radius > pipe.x && 
+                    bird.x - bird.radius < pipe.x + pipe.width && 
+                    (bird.y - bird.radius < pipe.topHeight || 
+                     bird.y + bird.radius > pipe.bottomY)
+                ) {
+                    endGame();
                 }
-            }, false);
+                
+                // Подсчет очков
+                if (!pipe.passed && bird.x > pipe.x + pipe.width) {
+                    pipe.passed = true;
+                    score++;
+                }
+            }
+            
+            // Удаление труб за пределами экрана
+            if (pipes.length > 0 && pipes[0].x < -pipes[0].width) {
+                pipes.shift();
+            }
+            
+            // Создание новых труб
+            if (pipes.length === 0 || pipes[pipes.length-1].x < canvas.width - 200) {
+                createPipes();
+            }
+            
+            // Проверка границ
+            if (bird.y + bird.radius > canvas.height || bird.y - bird.radius < 0) {
+                endGame();
+            }
+            
+            // Отрисовка счета
+            ctx.fillStyle = '#fff';
+            ctx.font = '24px Arial';
+            ctx.fillText(`Score: ${score}`, 20, 40);
+            
+            animationFrameId = requestAnimationFrame(gameLoop);
+        }
+
+        // 6. Завершение игры
+        function endGame() {
+            gameActive = false;
+            cancelAnimationFrame(animationFrameId);
+            
+            // Отправка результата
+            game.submitScore(score);
+            
+            // Экран завершения
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.fillStyle = '#fff';
+            ctx.font = '30px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('Game Over!', canvas.width/2, canvas.height/2 - 30);
+            ctx.fillText(`Score: ${score}`, canvas.width/2, canvas.height/2 + 20);
+            
+            // Кнопка рестарта
+            ctx.fillStyle = '#f1c40f';
+            ctx.fillRect(canvas.width/2 - 75, canvas.height/2 + 60, 150, 50);
+            ctx.fillStyle = '#000';
+            ctx.font = '20px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('Play Again', canvas.width/2, canvas.height/2 + 90);
+        }
+
+        // 7. Обработчики событий
+        canvas.addEventListener('click', (e) => {
+            if (gameActive) {
+                bird.velocity = bird.jump;
+            } else {
+                // Проверка клика по кнопке рестарта
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                if (x > canvas.width/2 - 75 && x < canvas.width/2 + 75 &&
+                    y > canvas.height/2 + 60 && y < canvas.height/2 + 110) {
+                    startGame();
+                }
+            }
         });
 
+        // 8. Функция начала игры
+        function startGame() {
+            // Настройка размеров
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            // Сброс параметров
+            bird.y = canvas.height/2;
+            bird.velocity = 0;
+            pipes.length = [];
+            score = 0;
+            gameActive = true;
+            
+            // Скрытие меню
+            menu.classList.add('hidden');
+            canvas.classList.remove('hidden');
+            
+            // Запуск игры
+            gameLoop();
+        }
+
+        // 9. Обработчики кнопок
+        playBtn.addEventListener('click', startGame);
+        
         supportBtn.addEventListener('click', () => {
             tg.openTelegramLink('https://t.me/your_support_bot');
         });
 
-        // Инициализация при готовности
-        tg.ready();
+        // 10. Инициализация при готовности
+        game.ready(() => {
+            // Можно добавить прелоадер при необходимости
+        });
+
+        // Обработчик ресайза
+        window.addEventListener('resize', () => {
+            if (gameActive) {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+        });
     </script>
 </body>
 </html>
