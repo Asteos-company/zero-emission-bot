@@ -77,27 +77,44 @@
         // 1. Инициализация Telegram WebApp
         const tg = window.Telegram.WebApp;
         
-        // 2. Настройка полноэкранного режима (убирает верхнюю панель)
-        tg.expand(); // Основная команда для полноэкранного режима
-        tg.enableClosingConfirmation(); // Подтверждение перед закрытием
-        tg.MainButton.hide(); // Скрываем основную кнопку если она есть
-        tg.BackButton.hide(); // Скрываем кнопку "Назад"
+        // 2. Запрос полноэкранного режима (новый метод 2025)
+        function requestFullscreen() {
+            if (tg.platform !== 'unknown' && tg.isExpanded === false) {
+                tg.web_app_request_fullscreen()
+                    .then(() => {
+                        console.log('Fullscreen granted');
+                        initApp();
+                    })
+                    .catch((error) => {
+                        console.error('Fullscreen error:', error);
+                        initApp();
+                    });
+            } else {
+                initApp();
+            }
+        }
         
-        // 3. Обработчики кнопок
-        document.getElementById('playBtn').addEventListener('click', () => {
-            tg.showAlert('Игра скоро будет доступна!');
-        });
+        // 3. Инициализация приложения
+        function initApp() {
+            tg.enableClosingConfirmation();
+            tg.MainButton.hide();
+            tg.BackButton.hide();
+            tg.setHeaderColor('#70c5ce');
+            tg.setBackgroundColor('#70c5ce');
+            
+            // Обработчики кнопок
+            document.getElementById('playBtn').addEventListener('click', () => {
+                tg.showAlert('Игра скоро будет доступна!');
+            });
+            
+            document.getElementById('supportBtn').addEventListener('click', () => {
+                tg.openTelegramLink('https://t.me/your_support_bot');
+            });
+        }
         
-        document.getElementById('supportBtn').addEventListener('click', () => {
-            tg.openTelegramLink('https://t.me/your_support_bot');
-        });
-
-        // 4. Инициализация при готовности
+        // 4. Запуск при готовности
         tg.ready();
-        
-        // 5. Дополнительные настройки интерфейса
-        tg.setHeaderColor('#70c5ce'); // Цвет фона заголовка
-        tg.setBackgroundColor('#70c5ce'); // Цвет фона веб-приложения
+        requestFullscreen();
     </script>
 </body>
 </html>
