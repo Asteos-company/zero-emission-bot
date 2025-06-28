@@ -7,19 +7,16 @@
     <title>Flappy Bird</title>
     <script src="https://telegram.org/js/telegram-game-api.js"></script>
     <style>
-        * {
+        body {
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: Arial, sans-serif;
-            background: #70c5ce;
-            overflow: hidden;
-            touch-action: manipulation;
             position: fixed;
             width: 100%;
             height: 100%;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+            background: #70c5ce;
+            touch-action: manipulation;
         }
         #app {
             position: absolute;
@@ -40,32 +37,30 @@
             color: #fff;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
             margin-bottom: 30px;
-            font-size: 2.5rem;
+            font-size: 2.2rem;
         }
         .btn {
             display: block;
             width: 100%;
-            margin: 15px auto;
-            padding: 18px;
+            margin: 15px 0;
+            padding: 16px;
             border: none;
-            border-radius: 30px;
-            font-size: 1.2rem;
+            border-radius: 12px;
+            font-size: 1.1rem;
             font-weight: bold;
             cursor: pointer;
-            transition: transform 0.2s;
+            transition: transform 0.1s;
         }
         .btn:active {
             transform: scale(0.96);
         }
         .btn-play {
-            background: linear-gradient(135deg, #f1c40f, #e67e22);
+            background: linear-gradient(to right, #f1c40f, #e67e22);
             color: white;
-            box-shadow: 0 6px 0 #d35400;
         }
         .btn-support {
-            background: linear-gradient(135deg, #3498db, #2980b9);
+            background: linear-gradient(to right, #3498db, #2980b9);
             color: white;
-            box-shadow: 0 6px 0 #1a5276;
         }
         #game-container {
             display: none;
@@ -75,268 +70,38 @@
             width: 100%;
             height: 100%;
         }
-        canvas {
-            display: block;
-            width: 100%;
-            height: 100%;
-        }
-        #game-over {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            background: rgba(0,0,0,0.8);
-            z-index: 100;
-        }
-        .game-over-text {
-            color: white;
-            font-size: 2rem;
-            margin-bottom: 30px;
-            text-align: center;
-        }
-        .score-text {
-            color: #f1c40f;
-            font-size: 3rem;
-            margin-bottom: 40px;
-            font-weight: bold;
-        }
     </style>
 </head>
 <body>
     <div id="app">
         <div id="menu">
             <h1>Flappy Bird</h1>
-            <button class="btn btn-play" id="playBtn">🕹️ Играть в игру</button>
-            <button class="btn btn-support" id="supportBtn">💬 Связаться с поддержкой</button>
-        </div>
-
-        <div id="game-container">
-            <canvas id="gameCanvas"></canvas>
-            <div id="game-over">
-                <div class="game-over-text">Game Over!</div>
-                <div class="score-text" id="finalScore">0</div>
-                <button class="btn btn-play" id="restartBtn">Играть снова</button>
-            </div>
+            <button class="btn btn-play" id="playBtn">Играть в игру</button>
+            <button class="btn btn-support" id="supportBtn">Связаться с поддержкой</button>
         </div>
     </div>
 
     <script>
         // 1. Инициализация Telegram WebApp
         const tg = window.Telegram.WebApp;
-        const game = new Telegram.Game('flappy_bird', {
-            api_version: '6.3',
-            fullscreen: true,
-            monetization: 'free'
-        });
         
-        // 2. Принудительное расширение на весь экран
+        // 2. Принудительное полноэкранное отображение
         tg.expand();
         tg.enableClosingConfirmation();
         tg.BackButton.hide();
         
-        // 3. Элементы интерфейса
-        const menu = document.getElementById('menu');
-        const gameContainer = document.getElementById('game-container');
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        const playBtn = document.getElementById('playBtn');
-        const supportBtn = document.getElementById('supportBtn');
-        const gameOverScreen = document.getElementById('game-over');
-        const finalScore = document.getElementById('finalScore');
-        const restartBtn = document.getElementById('restartBtn');
-
-        // 4. Основные параметры игры
-        const bird = {
-            x: 50,
-            y: 0,
-            radius: 20,
-            gravity: 0.5,
-            velocity: 0,
-            jump: -10,
-            color: '#f1c40f'
-        };
-
-        const pipes = [];
-        let score = 0;
-        let gameActive = false;
-        let animationFrameId;
-        let lastPipeTime = 0;
-        let pipeInterval = 1500;
-
-        // 5. Функция инициализации игры
-        function initGame() {
-            // Установка размеров
-            resizeCanvas();
-            
-            // Сброс параметров
-            bird.y = canvas.height / 2;
-            bird.velocity = 0;
-            pipes.length = 0;
-            score = 0;
-            lastPipeTime = 0;
-            gameActive = true;
-            gameOverScreen.style.display = 'none';
-            
-            // Запуск игрового цикла
-            gameLoop();
-        }
-
-        // 6. Игровой цикл
-        function gameLoop(timestamp) {
-            if (!gameActive) return;
-            
-            // Очистка canvas
-            ctx.fillStyle = '#70c5ce';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            // Обновление позиции птицы
-            bird.velocity += bird.gravity;
-            bird.y += bird.velocity;
-            
-            // Отрисовка птицы
-            ctx.fillStyle = bird.color;
-            ctx.beginPath();
-            ctx.arc(bird.x, bird.y, bird.radius, 0, Math.PI * 2);
-            ctx.fill();
-            
-            // Генерация новых труб
-            if (timestamp - lastPipeTime > pipeInterval) {
-                createPipe();
-                lastPipeTime = timestamp;
-            }
-            
-            // Обработка труб
-            for (let i = pipes.length - 1; i >= 0; i--) {
-                const pipe = pipes[i];
-                
-                // Движение труб
-                pipe.x -= 2;
-                
-                // Отрисовка труб
-                ctx.fillStyle = '#2ecc71';
-                ctx.fillRect(pipe.x, 0, pipe.width, pipe.topHeight);
-                ctx.fillRect(pipe.x, pipe.bottomY, pipe.width, canvas.height - pipe.bottomY);
-                
-                // Проверка столкновений
-                if (
-                    bird.x + bird.radius > pipe.x && 
-                    bird.x - bird.radius < pipe.x + pipe.width && 
-                    (bird.y - bird.radius < pipe.topHeight || 
-                     bird.y + bird.radius > pipe.bottomY)
-                ) {
-                    endGame();
-                }
-                
-                // Подсчет очков
-                if (!pipe.passed && bird.x > pipe.x + pipe.width) {
-                    pipe.passed = true;
-                    score++;
-                }
-                
-                // Удаление труб за пределами экрана
-                if (pipe.x < -pipe.width) {
-                    pipes.splice(i, 1);
-                }
-            }
-            
-            // Проверка границ
-            if (bird.y + bird.radius > canvas.height || bird.y - bird.radius < 0) {
-                endGame();
-            }
-            
-            // Отрисовка счета
-            ctx.fillStyle = '#fff';
-            ctx.font = '30px Arial';
-            ctx.fillText(`Score: ${score}`, 20, 40);
-            
-            animationFrameId = requestAnimationFrame(gameLoop);
-        }
-
-        // 7. Создание трубы
-        function createPipe() {
-            const gap = 150;
-            const minHeight = 50;
-            const maxHeight = canvas.height - gap - minHeight;
-            const height = Math.random() * (maxHeight - minHeight) + minHeight;
-            
-            pipes.push({
-                x: canvas.width,
-                topHeight: height,
-                bottomY: height + gap,
-                width: 80,
-                passed: false
-            });
-        }
-
-        // 8. Завершение игры
-        function endGame() {
-            gameActive = false;
-            cancelAnimationFrame(animationFrameId);
-            
-            // Отправка результата
-            game.submitScore(score, (success) => {
-                if (success) {
-                    console.log('Score submitted successfully');
-                }
-            });
-            
-            // Показ экрана завершения
-            finalScore.textContent = score;
-            gameOverScreen.style.display = 'flex';
-        }
-
-        // 9. Ресайз canvas
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            bird.y = canvas.height / 2;
-        }
-
-        // 10. Обработчики событий
-        playBtn.addEventListener('click', () => {
-            menu.style.display = 'none';
-            gameContainer.style.display = 'block';
-            initGame();
+        // 3. Обработчики кнопок
+        document.getElementById('playBtn').addEventListener('click', () => {
+            // Здесь будет запуск игры
+            tg.showAlert('Игра скоро будет доступна!');
         });
-
-        restartBtn.addEventListener('click', () => {
-            gameOverScreen.style.display = 'none';
-            initGame();
-        });
-
-        supportBtn.addEventListener('click', () => {
+        
+        document.getElementById('supportBtn').addEventListener('click', () => {
             tg.openTelegramLink('https://t.me/your_support_bot');
         });
 
-        canvas.addEventListener('click', () => {
-            if (gameActive) {
-                bird.velocity = bird.jump;
-            }
-        });
-
-        window.addEventListener('resize', resizeCanvas);
-
-        // 11. Инициализация при готовности
-        game.ready(() => {
-            // Дополнительная инициализация при необходимости
-            console.log('Game is ready');
-        });
-
-        // 12. Обработка кнопки "Назад" в Telegram
-        tg.onEvent('backButtonClicked', () => {
-            if (gameContainer.style.display === 'block') {
-                gameActive = false;
-                cancelAnimationFrame(animationFrameId);
-                gameContainer.style.display = 'none';
-                menu.style.display = 'block';
-                tg.BackButton.hide();
-            }
-        });
+        // 4. Инициализация при готовности
+        Telegram.WebApp.ready();
     </script>
 </body>
 </html>
