@@ -2,29 +2,36 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <!-- Критически важные meta-теги -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="telegram:game" content="flappy_bird">
+    
     <title>Flappy Bird</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    
     <style>
-        :root {
-            --tg-theme-bg-color: #70c5ce;
-            --tg-theme-text-color: #ffffff;
-            --tg-viewport-height: 100vh;
+        /* iOS-specific fixes */
+        @supports (padding-top: env(safe-area-inset-top)) {
+            :root {
+                --safe-area-inset-top: env(safe-area-inset-top);
+                --safe-area-inset-bottom: env(safe-area-inset-bottom);
+            }
         }
         
         body {
             margin: 0;
             padding: 0;
             width: 100vw;
-            height: var(--tg-viewport-height);
+            height: 100vh;
             overflow: hidden;
             font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--tg-theme-bg-color);
-            color: var(--tg-theme-text-color);
-            touch-action: manipulation;
+            background: #70c5ce;
+            color: white;
             position: fixed;
+            touch-action: manipulation;
+            -webkit-overflow-scrolling: touch;
         }
         
         #app {
@@ -34,7 +41,15 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+            padding-top: var(--safe-area-inset-top, 0);
+            padding-bottom: var(--safe-area-inset-bottom, 0);
+        }
+        
+        h1 {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 32px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
         
         .btn {
@@ -45,12 +60,11 @@
             border: none;
             font-size: 17px;
             font-weight: 500;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            color: white;
             cursor: pointer;
             transition: transform 0.1s;
             -webkit-tap-highlight-color: transparent;
+            box-shadow: 0 4px 0 rgba(0,0,0,0.2);
         }
         
         .btn:active {
@@ -58,21 +72,17 @@
         }
         
         .btn-play {
-            background: linear-gradient(135deg, #FF9500, #FF5E00);
-            color: white;
-            box-shadow: 0 4px 0 #CC4B00;
+            background: linear-gradient(to bottom, #FF9500, #FF5E00);
         }
         
         .btn-support {
-            background: linear-gradient(135deg, #007AFF, #0040FF);
-            color: white;
-            box-shadow: 0 4px 0 #002ECC;
+            background: linear-gradient(to bottom, #007AFF, #0040FF);
         }
     </style>
 </head>
 <body>
     <div id="app">
-        <h1 style="font-size: 28px; font-weight: 600; margin-bottom: 32px;">Flappy Bird</h1>
+        <h1>Flappy Bird</h1>
         <button class="btn btn-play" id="playBtn">Играть в игру</button>
         <button class="btn btn-support" id="supportBtn">Связаться с поддержкой</button>
     </div>
@@ -81,36 +91,46 @@
         // 1. Инициализация Telegram WebApp
         const tg = window.Telegram.WebApp;
         
-        // 2. Адаптация под iOS
-        function setupIOS() {
-            if (tg.platform === 'ios') {
-                document.documentElement.style.setProperty(
-                    '--tg-viewport-height', 
-                    `${window.innerHeight}px`
-                );
+        // 2. Специальный фикс для iPhone 11
+        function applyIPhone11Fix() {
+            if (/iPhone11/.test(navigator.userAgent)) {
+                document.body.style.height = 'fill-available';
+                document.documentElement.style.height = 'fill-available';
                 
-                // Фикс для iPhone Notch
-                const app = document.getElementById('app');
-                app.style.paddingTop = 'env(safe-area-inset-top)';
-                app.style.paddingBottom = 'env(safe-area-inset-bottom)';
-            }
-        }
-        
-        // 3. Полноэкранный режим
-        function expandApp() {
-            if (!tg.isExpanded) {
-                tg.expand();
+                // Принудительный рефреш viewport
                 setTimeout(() => {
-                    tg.enableClosingConfirmation();
-                    tg.BackButton.hide();
+                    const metaViewport = document.querySelector('meta[name="viewport"]');
+                    metaViewport.content = metaViewport.content;
                 }, 300);
             }
         }
         
-        // 4. Инициализация
+        // 3. Агрессивный полноэкранный режим
+        function forceFullscreen() {
+            tg.expand();
+            tg.enableClosingConfirmation();
+            tg.BackButton.hide();
+            tg.MainButton.hide();
+            tg.setHeaderColor('#70c5ce');
+            tg.setBackgroundColor('#70c5ce');
+            
+            // Дополнительные хаки для iOS
+            if (tg.platform === 'ios') {
+                document.body.style.overflow = 'hidden';
+                document.documentElement.style.overflow = 'hidden';
+                
+                // Фикс для Safari
+                setTimeout(() => {
+                    window.scrollTo(0, 0);
+                    document.body.scrollTop = 0;
+                }, 100);
+            }
+        }
+        
+        // 4. Инициализация приложения
         tg.ready();
-        setupIOS();
-        expandApp();
+        applyIPhone11Fix();
+        forceFullscreen();
         
         // 5. Обработчики событий
         document.getElementById('playBtn').addEventListener('click', () => {
@@ -121,14 +141,9 @@
             tg.openTelegramLink('https://t.me/your_support');
         });
         
-        // 6. Фикс ресайза на iOS
+        // 6. Фикс ресайза
         window.addEventListener('resize', () => {
-            if (tg.platform === 'ios') {
-                document.documentElement.style.setProperty(
-                    '--tg-viewport-height', 
-                    `${window.innerHeight}px`
-                );
-            }
+            forceFullscreen();
         });
     </script>
 </body>
