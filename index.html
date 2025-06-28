@@ -17,7 +17,7 @@
             font-family: -apple-system, BlinkMacSystemFont, sans-serif;
             background: #70c5ce;
             position: fixed;
-            touch-action: manipulation;
+            touch-action: none; /* Отключаем все жесты касания */
         }
         #app {
             width: 100%;
@@ -59,34 +59,44 @@
     <script>
         const tg = window.Telegram.WebApp;
         
-        // Фикс для полноэкранного режима 2025
+        // Функция для активации полноэкранного режима
         function activateFullscreen() {
-            // 1. Основной метод (новый в 2025)
+            // Запрещаем свайп вниз для закрытия
+            tg.enableClosingConfirmation();
+            
+            // Основной метод для полноэкранного режима
             if (tg.requestFullscreen) {
                 tg.requestFullscreen();
-            } 
-            // 2. Fallback для старых версий
-            else {
+            } else {
                 tg.expand();
             }
             
-            // 3. Скрываем все элементы интерфейса Telegram
+            // Настраиваем интерфейс Telegram
             tg.BackButton.hide();
             tg.MainButton.hide();
             tg.setHeaderColor('#70c5ce');
             tg.setBackgroundColor('#70c5ce');
             
-            // 4. Фикс для iOS
+            // Фикс для iOS
             if (tg.platform === 'ios') {
                 document.body.style.overflow = 'hidden';
                 document.documentElement.style.overflow = 'hidden';
-                setTimeout(() => window.scrollTo(0, 0), 50);
+                window.scrollTo(0, 0);
             }
         }
 
-        // Инициализация
-        tg.ready();
-        setTimeout(activateFullscreen, 300); // Задержка для надежности
+        // Инициализация (без задержки)
+        document.addEventListener('DOMContentLoaded', () => {
+            tg.ready();
+            activateFullscreen(); // Активируем сразу без задержки
+            
+            // Блокируем жесты прокрутки
+            document.body.addEventListener('touchmove', (e) => {
+                if (!e.target.classList.contains('scrollable')) {
+                    e.preventDefault();
+                }
+            }, { passive: false });
+        });
 
         document.getElementById('playBtn').addEventListener('click', () => {
             tg.showAlert('Игра в разработке!');
