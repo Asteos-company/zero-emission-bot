@@ -2,24 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <!-- Критически важные meta-теги -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="telegram:game" content="flappy_bird">
-    
     <title>Flappy Bird</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    
     <style>
-        /* iOS-specific fixes */
-        @supports (padding-top: env(safe-area-inset-top)) {
-            :root {
-                --safe-area-inset-top: env(safe-area-inset-top);
-                --safe-area-inset-bottom: env(safe-area-inset-bottom);
-            }
-        }
-        
         body {
             margin: 0;
             padding: 0;
@@ -28,12 +16,9 @@
             overflow: hidden;
             font-family: -apple-system, BlinkMacSystemFont, sans-serif;
             background: #70c5ce;
-            color: white;
             position: fixed;
             touch-action: manipulation;
-            -webkit-overflow-scrolling: touch;
         }
-        
         #app {
             width: 100%;
             height: 100%;
@@ -41,17 +26,8 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            padding-top: var(--safe-area-inset-top, 0);
-            padding-bottom: var(--safe-area-inset-bottom, 0);
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
         }
-        
-        h1 {
-            font-size: 28px;
-            font-weight: 600;
-            margin-bottom: 32px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-        
         .btn {
             width: 280px;
             height: 52px;
@@ -62,21 +38,14 @@
             font-weight: 500;
             color: white;
             cursor: pointer;
-            transition: transform 0.1s;
-            -webkit-tap-highlight-color: transparent;
-            box-shadow: 0 4px 0 rgba(0,0,0,0.2);
         }
-        
-        .btn:active {
-            transform: scale(0.96);
-        }
-        
         .btn-play {
             background: linear-gradient(to bottom, #FF9500, #FF5E00);
+            box-shadow: 0 4px 0 #CC4B00;
         }
-        
         .btn-support {
             background: linear-gradient(to bottom, #007AFF, #0040FF);
+            box-shadow: 0 4px 0 #002ECC;
         }
     </style>
 </head>
@@ -88,62 +57,43 @@
     </div>
 
     <script>
-        // 1. Инициализация Telegram WebApp
         const tg = window.Telegram.WebApp;
         
-        // 2. Специальный фикс для iPhone 11
-        function applyIPhone11Fix() {
-            if (/iPhone11/.test(navigator.userAgent)) {
-                document.body.style.height = 'fill-available';
-                document.documentElement.style.height = 'fill-available';
-                
-                // Принудительный рефреш viewport
-                setTimeout(() => {
-                    const metaViewport = document.querySelector('meta[name="viewport"]');
-                    metaViewport.content = metaViewport.content;
-                }, 300);
+        // Фикс для полноэкранного режима 2025
+        function activateFullscreen() {
+            // 1. Основной метод (новый в 2025)
+            if (tg.requestFullscreen) {
+                tg.requestFullscreen();
+            } 
+            // 2. Fallback для старых версий
+            else {
+                tg.expand();
             }
-        }
-        
-        // 3. Агрессивный полноэкранный режим
-        function forceFullscreen() {
-            tg.expand();
-            tg.enableClosingConfirmation();
+            
+            // 3. Скрываем все элементы интерфейса Telegram
             tg.BackButton.hide();
             tg.MainButton.hide();
             tg.setHeaderColor('#70c5ce');
             tg.setBackgroundColor('#70c5ce');
             
-            // Дополнительные хаки для iOS
+            // 4. Фикс для iOS
             if (tg.platform === 'ios') {
                 document.body.style.overflow = 'hidden';
                 document.documentElement.style.overflow = 'hidden';
-                
-                // Фикс для Safari
-                setTimeout(() => {
-                    window.scrollTo(0, 0);
-                    document.body.scrollTop = 0;
-                }, 100);
+                setTimeout(() => window.scrollTo(0, 0), 50);
             }
         }
-        
-        // 4. Инициализация приложения
+
+        // Инициализация
         tg.ready();
-        applyIPhone11Fix();
-        forceFullscreen();
-        
-        // 5. Обработчики событий
+        setTimeout(activateFullscreen, 300); // Задержка для надежности
+
         document.getElementById('playBtn').addEventListener('click', () => {
             tg.showAlert('Игра в разработке!');
         });
         
         document.getElementById('supportBtn').addEventListener('click', () => {
             tg.openTelegramLink('https://t.me/your_support');
-        });
-        
-        // 6. Фикс ресайза
-        window.addEventListener('resize', () => {
-            forceFullscreen();
         });
     </script>
 </body>
