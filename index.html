@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Zer0 Emission Games</title>
+    <title>Flappy Bird</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body {
@@ -65,11 +65,10 @@
             box-shadow: 0 4px 0 #A00800;
             margin-top: 16px;
         }
-        h1, h2 {
+        h1 {
             color: white;
             text-shadow: 0 2px 4px rgba(0,0,0,0.2);
             margin-bottom: 24px;
-            text-align: center;
         }
         .scrollable {
             -webkit-overflow-scrolling: touch;
@@ -84,18 +83,18 @@
         
         <div id="gamesMenu" class="scrollable">
             <h2>Выберите игру</h2>
-            <button class="btn btn-game" data-game="2048">2048</button>
-            <button class="btn btn-game" data-game="ClumsyBird">Clumsy Bird</button>
-            <button class="btn btn-game" data-game="Hextris">Hextris</button>
-            <button class="btn btn-game" data-game="Pacman">Pacman</button>
-            <button class="btn btn-game" data-game="Astray">Astray</button>
-            <button class="btn btn-game" data-game="Tetris">Tetris</button>
-            <button class="btn btn-game" data-game="Agent8Ball">Agent 8 Ball</button>
-            <button class="btn btn-game" data-game="TicTacToe">Tic Tac Toe</button>
-            <button class="btn btn-game" data-game="Racer">3D Racer</button>
-            <button class="btn btn-game" data-game="MK">MK</button>
-            <button class="btn btn-game" data-game="Shootr">Shootr</button>
-            <button class="btn btn-game" data-game="BrowserQuest">Browser Quest</button>
+            <button class="btn btn-game" data-url="https://gabrielecirulli.github.io/2048/">2048</button>
+            <button class="btn btn-game" data-url="https://ellisonleao.github.io/clumsy-bird/">Clumsy Bird</button>
+            <button class="btn btn-game" data-url="https://hextris.github.io/hextris/">Hextris</button>
+            <button class="btn btn-game" data-url="https://pacman.platzh1rsch.ch/">Pacman in Canvas</button>
+            <button class="btn btn-game" data-url="https://wwwtyro.github.io/Astray/">Astray</button>
+            <button class="btn btn-game" data-url="https://dionyziz.logimus.com/tetris/">Canvas Tetris</button>
+            <button class="btn btn-game" data-url="https://agent8ball.com/">Agent 8 ball</button>
+            <button class="btn btn-game" data-url="https://codepen.io/timrijkse/full/XjLGKv/">Tic Tac Toe</button>
+            <button class="btn btn-game" data-url="https://codeincomplete.com/games/racer/v4-final/">Pseudo 3D Racer</button>
+            <button class="btn btn-game" data-url="https://mk.mgechev.com/">MK</button>
+            <button class="btn btn-game" data-url="https://shootr.signalr.net/">Shootr</button>
+            <button class="btn btn-game" data-url="https://browserquest.mozilla.org/">Browser Quest</button>
             <button class="btn btn-back" id="backBtn">Назад</button>
         </div>
     </div>
@@ -103,22 +102,6 @@
     <script>
         const tg = window.Telegram.WebApp;
         
-        // Игры (если зарегистрированы в @BotFather)
-        const GAMES = {
-            "2048": "2048_game", // short_name из BotFather
-            "ClumsyBird": "clumsy_bird_game",
-            "Hextris": "hextris_game",
-            "Pacman": "pacman_game",
-            "Astray": "astray_game",
-            "Tetris": "tetris_game",
-            "Agent8Ball": "agent8ball_game",
-            "TicTacToe": "tictactoe_game",
-            "Racer": "racer_game",
-            "MK": "mk_game",
-            "Shootr": "shootr_game",
-            "BrowserQuest": "browserquest_game"
-        };
-
         function activateFullscreen() {
             tg.enableClosingConfirmation();
             tg.setHeaderColor('secondary_bg_color');
@@ -150,6 +133,7 @@
                 }
             }, { passive: false });
 
+            // Обработчики кнопок
             const playBtn = document.getElementById('playBtn');
             const supportBtn = document.getElementById('supportBtn');
             const backBtn = document.getElementById('backBtn');
@@ -171,4 +155,16 @@
             });
 
             gameButtons.forEach(button => {
-                button.addEventListener('cl
+                button.addEventListener('click', () => {
+                    const gameUrl = button.getAttribute('data-url');
+                    tg.openLink(gameUrl, { try_instant_view: true });
+                });
+            });
+
+            supportBtn.addEventListener('click', () => {
+                tg.openTelegramLink('https://t.me/your_support');
+            });
+        });
+    </script>
+</body>
+</html>
