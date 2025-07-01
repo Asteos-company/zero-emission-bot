@@ -8,6 +8,7 @@
     <title>Zer0 Emission Games</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
+        /* Ваши стили остаются без изменений */
         body {
             margin: 0;
             padding: 0;
@@ -137,11 +138,18 @@
             });
 
             game2048Btn.addEventListener('click', () => {
-                // Открываем игру через Telegram Game Platform
-                tg.openGame('game_2048'); // Используем short_name вашей игры
-                
-                // Альтернативный вариант через прямую ссылку (если нужно)
-                // tg.openLink('https://t.me/BaronMakaron18_bot?game=game_2048');
+                // Пробуем открыть игру через Telegram Game Platform
+                try {
+                    if (tg.openGame) {
+                        tg.openGame('game_2048', {try_instant_view: true});
+                    } else {
+                        // Если метод недоступен (например, в веб-версии)
+                        window.open('https://t.me/BaronMakaron18_bot?game=game_2048', '_blank');
+                    }
+                } catch (e) {
+                    // Если произошла ошибка, открываем через ссылку
+                    tg.openLink('https://izhenergo.github.io/2048-game/', {try_instant_view: true});
+                }
             });
             
             supportBtn.addEventListener('click', () => {
