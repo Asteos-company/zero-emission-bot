@@ -137,7 +137,11 @@
             });
 
             game2048Btn.addEventListener('click', () => {
-                tg.showAlert("Игра в процессе разработки :)");
+                // Открываем игру через Telegram Game Platform
+                tg.openGame('game_2048'); // Используем short_name вашей игры
+                
+                // Альтернативный вариант через прямую ссылку (если нужно)
+                // tg.openLink('https://t.me/BaronMakaron18_bot?game=game_2048');
             });
             
             supportBtn.addEventListener('click', () => {
