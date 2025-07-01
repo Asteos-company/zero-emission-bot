@@ -137,24 +137,49 @@
             });
 
             game2048Btn.addEventListener('click', () => {
-                // Основной метод - открытие через Telegram Game Platform
-                if (tg && tg.openGame) {
-                    try {
-                        tg.openGame('game_2048');
-                        return;
-                    } catch (e) {
-                        console.error('Error opening game:', e);
-                    }
-                }
+                // 1. Создаем iframe для бесшовного встраивания игры
+                const iframe = document.createElement('iframe');
+                iframe.src = 'https://izhenergo.github.io/2048-game/';
+                iframe.style.position = 'fixed';
+                iframe.style.top = '0';
+                iframe.style.left = '0';
+                iframe.style.width = '100%';
+                iframe.style.height = '100%';
+                iframe.style.border = 'none';
+                iframe.style.zIndex = '9999';
+                iframe.style.backgroundColor = '#faf8ef';
                 
-                // Альтернативный метод - прямая ссылка на игру
-                const gameUrl = 'https://izhenergo.github.io/2048-game/';
+                // 2. Добавляем кнопку закрытия
+                const closeBtn = document.createElement('button');
+                closeBtn.textContent = '×';
+                closeBtn.style.position = 'fixed';
+                closeBtn.style.top = '20px';
+                closeBtn.style.right = '20px';
+                closeBtn.style.width = '40px';
+                closeBtn.style.height = '40px';
+                closeBtn.style.borderRadius = '50%';
+                closeBtn.style.background = '#FF3B30';
+                closeBtn.style.color = 'white';
+                closeBtn.style.fontSize = '24px';
+                closeBtn.style.border = 'none';
+                closeBtn.style.zIndex = '10000';
+                closeBtn.style.cursor = 'pointer';
                 
-                if (tg && tg.openLink) {
-                    tg.openLink(gameUrl, {try_instant_view: true});
-                } else {
-                    window.open(gameUrl, '_blank');
-                }
+                // 3. Функция закрытия игры
+                const closeGame = () => {
+                    document.body.removeChild(iframe);
+                    document.body.removeChild(closeBtn);
+                    gamesMenu.style.display = 'none';
+                    document.querySelectorAll('#app > button').forEach(btn => {
+                        btn.style.display = 'block';
+                    });
+                };
+                
+                closeBtn.addEventListener('click', closeGame);
+                
+                // 4. Добавляем элементы на страницу
+                document.body.appendChild(iframe);
+                document.body.appendChild(closeBtn);
             });
             
             supportBtn.addEventListener('click', () => {
