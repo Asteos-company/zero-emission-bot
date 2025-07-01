@@ -1,35 +1,154 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Все метатеги и стили остаются без изменений -->
-    <!-- ... -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Zer0 Emission Games</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #70c5ce;
+            position: fixed;
+            touch-action: none;
+        }
+        #app {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+        }
+        #gamesMenu {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+        }
+        .btn {
+            width: 280px;
+            height: 52px;
+            margin: 12px 0;
+            border-radius: 26px;
+            border: none;
+            font-size: 17px;
+            font-weight: 500;
+            color: white;
+            cursor: pointer;
+        }
+        .btn-play {
+            background: linear-gradient(to bottom, #FF9500, #FF5E00);
+            box-shadow: 0 4px 0 #CC4B00;
+        }
+        .btn-support {
+            background: linear-gradient(to bottom, #007AFF, #0040FF);
+            box-shadow: 0 4px 0 #002ECC;
+        }
+        .btn-game {
+            background: linear-gradient(to bottom, #34C759, #28A745);
+            box-shadow: 0 4px 0 #1E7E34;
+        }
+        .btn-back {
+            background: linear-gradient(to bottom, #FF3B30, #D70015);
+            box-shadow: 0 4px 0 #A00800;
+            margin-top: 20px;
+        }
+        h1, h2 {
+            color: white;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            margin-bottom: 24px;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
-    <!-- Весь HTML остаётся без изменений -->
-    <!-- ... -->
+    <div id="app">
+        <h1>Zer0 Emission</h1>
+        <button class="btn btn-play" id="playBtn">Играть в игры</button>
+        <button class="btn btn-support" id="supportBtn">Связаться с поддержкой</button>
+        
+        <div id="gamesMenu">
+            <h2>Выберите игру</h2>
+            <button class="btn btn-game" id="game2048">2048</button>
+            <button class="btn btn-back" id="backBtn">Назад</button>
+        </div>
+    </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         
-        // ... остальной код без изменений ...
+        function activateFullscreen() {
+            tg.enableClosingConfirmation();
+            tg.setHeaderColor('secondary_bg_color');
+            
+            if (tg.requestFullscreen) {
+                tg.requestFullscreen();
+            } else {
+                tg.expand();
+            }
+            
+            tg.BackButton.hide();
+            tg.MainButton.hide();
+            tg.setBackgroundColor('#70c5ce');
+            
+            if (tg.platform === 'ios') {
+                document.body.style.overflow = 'hidden';
+                document.documentElement.style.overflow = 'hidden';
+                window.scrollTo(0, 0);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            tg.ready();
+            activateFullscreen();
+            
+            document.body.addEventListener('touchmove', (e) => {
+                if (!e.target.classList.contains('scrollable')) {
+                    e.preventDefault();
+                }
+            }, { passive: false });
+
+            const playBtn = document.getElementById('playBtn');
+            const supportBtn = document.getElementById('supportBtn');
+            const backBtn = document.getElementById('backBtn');
+            const game2048Btn = document.getElementById('game2048');
+            const gamesMenu = document.getElementById('gamesMenu');
+
+            playBtn.addEventListener('click', () => {
+                document.querySelectorAll('#app > button').forEach(btn => {
+                    btn.style.display = 'none';
+                });
+                gamesMenu.style.display = 'flex';
+            });
+
+            backBtn.addEventListener('click', () => {
+                gamesMenu.style.display = 'none';
+                document.querySelectorAll('#app > button').forEach(btn => {
+                    btn.style.display = 'block';
+                });
+            });
 
             game2048Btn.addEventListener('click', () => {
-                console.log('Attempting to open game...');
-                
-                // 1. Пробуем открыть через Telegram Game Platform
+                // Основной метод - открытие через Telegram Game Platform
                 if (tg && tg.openGame) {
-                    console.log('Using openGame API method');
                     try {
                         tg.openGame('game_2048');
                         return;
                     } catch (e) {
-                        console.error('openGame failed:', e);
+                        console.error('Error opening game:', e);
                     }
                 }
                 
-                // 2. Альтернативный вариант - Instant View
-                console.log('Falling back to Instant View');
-                const gameUrl = 'https://t.me/iv?url=https://izhenergo.github.io/2048-game/&rhash=game_2048';
+                // Альтернативный метод - прямая ссылка на игру
+                const gameUrl = 'https://izhenergo.github.io/2048-game/';
                 
                 if (tg && tg.openLink) {
                     tg.openLink(gameUrl, {try_instant_view: true});
@@ -38,7 +157,10 @@
                 }
             });
             
-            // ... остальной код без изменений ...
+            supportBtn.addEventListener('click', () => {
+                tg.openTelegramLink('https://t.me/your_support');
+            });
+        });
     </script>
 </body>
 </html>
