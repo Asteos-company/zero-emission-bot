@@ -28,6 +28,14 @@
             align-items: center;
             padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
         }
+        #gamesMenu {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            max-height: 80vh;
+            overflow-y: auto;
+            padding: 10px;
+        }
         .btn {
             width: 280px;
             height: 52px;
@@ -47,6 +55,24 @@
             background: linear-gradient(to bottom, #007AFF, #0040FF);
             box-shadow: 0 4px 0 #002ECC;
         }
+        .btn-game {
+            background: linear-gradient(to bottom, #34C759, #28A745);
+            box-shadow: 0 4px 0 #1E7E34;
+            margin: 8px 0;
+        }
+        .btn-back {
+            background: linear-gradient(to bottom, #FF3B30, #D70015);
+            box-shadow: 0 4px 0 #A00800;
+            margin-top: 16px;
+        }
+        h1 {
+            color: white;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            margin-bottom: 24px;
+        }
+        .scrollable {
+            -webkit-overflow-scrolling: touch;
+        }
     </style>
 </head>
 <body>
@@ -54,29 +80,42 @@
         <h1>Zer0 Emission</h1>
         <button class="btn btn-play" id="playBtn">Играть в игры</button>
         <button class="btn btn-support" id="supportBtn">Связаться с поддержкой</button>
+        
+        <div id="gamesMenu" class="scrollable">
+            <h2>Выберите игру</h2>
+            <button class="btn btn-game" data-url="https://gabrielecirulli.github.io/2048/">2048</button>
+            <button class="btn btn-game" data-url="https://ellisonleao.github.io/clumsy-bird/">Clumsy Bird</button>
+            <button class="btn btn-game" data-url="https://hextris.github.io/hextris/">Hextris</button>
+            <button class="btn btn-game" data-url="https://pacman.platzh1rsch.ch/">Pacman in Canvas</button>
+            <button class="btn btn-game" data-url="https://wwwtyro.github.io/Astray/">Astray</button>
+            <button class="btn btn-game" data-url="https://dionyziz.logimus.com/tetris/">Canvas Tetris</button>
+            <button class="btn btn-game" data-url="https://agent8ball.com/">Agent 8 ball</button>
+            <button class="btn btn-game" data-url="https://codepen.io/timrijkse/full/XjLGKv/">Tic Tac Toe</button>
+            <button class="btn btn-game" data-url="https://codeincomplete.com/games/racer/v4-final/">Pseudo 3D Racer</button>
+            <button class="btn btn-game" data-url="https://mk.mgechev.com/">MK</button>
+            <button class="btn btn-game" data-url="https://shootr.signalr.net/">Shootr</button>
+            <button class="btn btn-game" data-url="https://browserquest.mozilla.org/">Browser Quest</button>
+            <button class="btn btn-back" id="backBtn">Назад</button>
+        </div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         
         function activateFullscreen() {
-            // Убираем стрелочку вниз и запрещаем свайп для закрытия
             tg.enableClosingConfirmation();
-            tg.setHeaderColor('secondary_bg_color'); // Используем цвет фона
+            tg.setHeaderColor('secondary_bg_color');
             
-            // Основной метод для полноэкранного режима
             if (tg.requestFullscreen) {
                 tg.requestFullscreen();
             } else {
                 tg.expand();
             }
             
-            // Скрываем кнопки интерфейса Telegram
             tg.BackButton.hide();
             tg.MainButton.hide();
             tg.setBackgroundColor('#70c5ce');
             
-            // Фикс для iOS
             if (tg.platform === 'ios') {
                 document.body.style.overflow = 'hidden';
                 document.documentElement.style.overflow = 'hidden';
@@ -84,25 +123,47 @@
             }
         }
 
-        // Инициализация
         document.addEventListener('DOMContentLoaded', () => {
             tg.ready();
             activateFullscreen();
             
-            // Блокируем жесты прокрутки
             document.body.addEventListener('touchmove', (e) => {
                 if (!e.target.classList.contains('scrollable')) {
                     e.preventDefault();
                 }
             }, { passive: false });
-        });
 
-        document.getElementById('playBtn').addEventListener('click', () => {
-            tg.showAlert('Игра в разработке!');
-        });
-        
-        document.getElementById('supportBtn').addEventListener('click', () => {
-            tg.openTelegramLink('https://t.me/your_support');
+            // Обработчики кнопок
+            const playBtn = document.getElementById('playBtn');
+            const supportBtn = document.getElementById('supportBtn');
+            const backBtn = document.getElementById('backBtn');
+            const gamesMenu = document.getElementById('gamesMenu');
+            const gameButtons = document.querySelectorAll('.btn-game');
+
+            playBtn.addEventListener('click', () => {
+                document.querySelectorAll('#app > button').forEach(btn => {
+                    btn.style.display = 'none';
+                });
+                gamesMenu.style.display = 'flex';
+            });
+
+            backBtn.addEventListener('click', () => {
+                gamesMenu.style.display = 'none';
+                document.querySelectorAll('#app > button').forEach(btn => {
+                    btn.style.display = 'block';
+                });
+            });
+
+            gameButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const gameUrl = button.getAttribute('data-url');
+                    tg.openLink(gameUrl, { try_instant_view: true });
+                });
+            });
+
+            supportBtn.addEventListener('click', () => {
+                tg.openTelegramLink('https://t.me/your_support');
+            });
         });
     </script>
 </body>
