@@ -13,7 +13,7 @@
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             width: 100vw;
             height: 100vh;
@@ -22,7 +22,7 @@
             touch-action: none;
             background: white; /* Белый фон */
         }
-        
+
         /* Fullscreen splash image */
         #splash {
             position: fixed;
@@ -36,17 +36,17 @@
             align-items: center;
             z-index: 1000;
         }
-        
+
         #splash img {
             width: 100%;
             height: 100%;
             object-fit: cover;
         }
-        
+
         #splash.hidden {
             display: none;
         }
-        
+
         #app {
             width: 100%;
             height: 100%;
@@ -57,18 +57,18 @@
             background: white; /* Белый фон */
             padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
         }
-        
+
         #app.visible {
             display: flex;
         }
-        
+
         /* Остальные стили остаются без изменений */
         #gamesMenu {
             display: none;
             flex-direction: column;
             align-items: center;
         }
-        
+
         .btn {
             width: 280px;
             height: 52px;
@@ -80,29 +80,29 @@
             color: white;
             cursor: pointer;
         }
-        
+
         .btn-play {
             background: #bef761; /* Новый цвет кнопки */
             box-shadow: 0 4px 0 #9acd32;
             color: #333; /* Темный текст для лучшей читаемости */
         }
-        
+
         .btn-support {
             background: linear-gradient(to bottom, #007AFF, #0040FF);
             box-shadow: 0 4px 0 #002ECC;
         }
-        
+
         .btn-game {
             background: linear-gradient(to bottom, #34C759, #28A745);
             box-shadow: 0 4px 0 #1E7E34;
         }
-        
+
         .btn-back {
             background: linear-gradient(to bottom, #FF3B30, #D70015);
             box-shadow: 0 4px 0 #A00800;
             margin-top: 20px;
         }
-        
+
         h1, h2 {
             color: #333; /* Темный текст для белого фона */
             text-shadow: none; /* Убрали тень для лучшей читаемости */
@@ -114,15 +114,15 @@
 <body>
     <!-- Сплеш-скрин (только изображение) -->
     <div id="splash">
-        <img src="https://s3-alpha.figma.com/hub/file/3989027226/9a8f9c7d-6a4b-4d8b-a9d2-5d5e5b5d5e5b-cover.png" alt="Splash Screen">
+        <img alt="Splash Screen" src="ZM.png">
     </div>
-    
+
     <!-- Основное содержимое приложения -->
     <div id="app">
         <h1>Zer0 Emission</h1>
-        <button class="btn btn-play" id="playBtn">Поиграть в игры</button> <!-- Измененный текст кнопки -->
+        <button class="btn btn-play" id="playBtn">Игры</button> <!-- Измененный текст кнопки -->
         <button class="btn btn-support" id="supportBtn">Связаться с поддержкой</button>
-        
+
         <div id="gamesMenu">
             <h2>Выберите игру</h2>
             <button class="btn btn-game" id="game2048">2048</button>
@@ -132,21 +132,21 @@
 
     <script>
         const tg = window.Telegram.WebApp;
-        
+
         function activateFullscreen() {
             tg.enableClosingConfirmation();
             tg.setHeaderColor('secondary_bg_color');
-            
+
             if (tg.requestFullscreen) {
                 tg.requestFullscreen();
             } else {
                 tg.expand();
             }
-            
+
             tg.BackButton.hide();
             tg.MainButton.hide();
             tg.setBackgroundColor('#ffffff'); /* Белый фон для Telegram */
-            
+
             if (tg.platform === 'ios') {
                 document.body.style.overflow = 'hidden';
                 document.documentElement.style.overflow = 'hidden';
@@ -165,7 +165,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             tg.ready();
             activateFullscreen();
-            
+
             // Блокировка скролла
             document.body.addEventListener('touchmove', (e) => {
                 if (!e.target.classList.contains('scrollable')) {
@@ -205,7 +205,7 @@
             game2048Btn.addEventListener('click', () => {
                 openGameDirectly('https://izhenergo.github.io/2048/');
             });
-            
+
             supportBtn.addEventListener('click', () => {
                 tg.openTelegramLink('https://t.me/your_support');
             });
