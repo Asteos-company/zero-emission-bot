@@ -22,7 +22,7 @@
         #app {
             width: 100%;
             height: 100%;
-            display: flex;
+            display: none; /* Initially hidden */
             flex-direction: column;
             justify-content: center;
             align-items: center;
@@ -67,9 +67,37 @@
             margin-bottom: 24px;
             text-align: center;
         }
+        
+        /* Splash screen styles */
+        #splash {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #70c5ce;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        #splash-img {
+            width: 100%;
+            height: 100%;
+            background-image: url('ZM.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
     </style>
 </head>
 <body>
+    <!-- Splash screen with ZM.png -->
+    <div id="splash">
+        <div id="splash-img"></div>
+    </div>
+    
+    <!-- Main app content (hidden initially) -->
     <div id="app">
         <h1>Zer0 Emission</h1>
         <button class="btn btn-play" id="playBtn">Играть в игры</button>
@@ -107,13 +135,10 @@
         }
 
         function openGameDirectly(url) {
-            // Самый надежный способ для Telegram
             if (tg && tg.openGame) {
-                tg.openGame('game_2048'); // Используйте short_name из @BotFather
+                tg.openGame('game_2048');
                 return;
             }
-            
-            // Альтернативный способ для других платформ
             window.location.href = url;
         }
 
@@ -132,6 +157,14 @@
             const backBtn = document.getElementById('backBtn');
             const game2048Btn = document.getElementById('game2048');
             const gamesMenu = document.getElementById('gamesMenu');
+            const splash = document.getElementById('splash');
+            const app = document.getElementById('app');
+
+            // Hide splash screen after 1.5 seconds and show main app
+            setTimeout(() => {
+                splash.style.display = 'none';
+                app.style.display = 'flex';
+            }, 1500);
 
             playBtn.addEventListener('click', () => {
                 document.querySelectorAll('#app > button').forEach(btn => {
