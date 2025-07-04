@@ -19,20 +19,64 @@
             position: fixed;
             touch-action: none;
         }
+        
+        /* Splash screen styles */
+        #splash {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #70c5ce;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 0.5s ease-out;
+        }
+        
+        #splash img {
+            width: 150px;
+            height: 150px;
+            margin-bottom: 20px;
+            animation: pulse 1.5s infinite alternate;
+        }
+        
+        #splash h1 {
+            color: white;
+            font-size: 24px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            margin-top: 20px;
+        }
+        
+        @keyframes pulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.1); }
+        }
+        
         #app {
             width: 100%;
             height: 100%;
-            display: none; /* Initially hidden */
+            display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+            opacity: 0;
+            transition: opacity 0.5s ease-in;
         }
+        
+        #app.visible {
+            opacity: 1;
+        }
+        
         #gamesMenu {
             display: none;
             flex-direction: column;
             align-items: center;
         }
+        
         .btn {
             width: 280px;
             height: 52px;
@@ -44,60 +88,44 @@
             color: white;
             cursor: pointer;
         }
+        
         .btn-play {
             background: linear-gradient(to bottom, #FF9500, #FF5E00);
             box-shadow: 0 4px 0 #CC4B00;
         }
+        
         .btn-support {
             background: linear-gradient(to bottom, #007AFF, #0040FF);
             box-shadow: 0 4px 0 #002ECC;
         }
+        
         .btn-game {
             background: linear-gradient(to bottom, #34C759, #28A745);
             box-shadow: 0 4px 0 #1E7E34;
         }
+        
         .btn-back {
             background: linear-gradient(to bottom, #FF3B30, #D70015);
             box-shadow: 0 4px 0 #A00800;
             margin-top: 20px;
         }
+        
         h1, h2 {
             color: white;
             text-shadow: 0 2px 4px rgba(0,0,0,0.2);
             margin-bottom: 24px;
             text-align: center;
         }
-        
-        /* Splash screen styles */
-        #splash {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #70c5ce;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-        #splash-img {
-            width: 100%;
-            height: 100%;
-            background-image: url('ZM.png');
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
-        }
     </style>
 </head>
 <body>
-    <!-- Splash screen with ZM.png -->
+    <!-- Splash screen -->
     <div id="splash">
-        <div id="splash-img"></div>
+        <img src="ZM.png" alt="Zer0 Mission Logo">
+        <h1>Zer0 Emission</h1>
     </div>
     
-    <!-- Main app content (hidden initially) -->
+    <!-- Main app content (initially hidden) -->
     <div id="app">
         <h1>Zer0 Emission</h1>
         <button class="btn btn-play" id="playBtn">Играть в игры</button>
@@ -160,11 +188,14 @@
             const splash = document.getElementById('splash');
             const app = document.getElementById('app');
 
-            // Hide splash screen after 1.5 seconds and show main app
+            // Hide splash screen after 2 seconds and show main app
             setTimeout(() => {
-                splash.style.display = 'none';
-                app.style.display = 'flex';
-            }, 1500);
+                splash.style.opacity = '0';
+                setTimeout(() => {
+                    splash.style.display = 'none';
+                    app.classList.add('visible');
+                }, 500);
+            }, 2000);
 
             playBtn.addEventListener('click', () => {
                 document.querySelectorAll('#app > button').forEach(btn => {
