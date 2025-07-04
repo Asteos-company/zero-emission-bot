@@ -8,36 +8,42 @@
     <title>Zer0 Emission Games</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body {
+        * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
             width: 100vw;
             height: 100vh;
             overflow: hidden;
             font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #70c5ce;
             position: fixed;
             touch-action: none;
         }
         
-        /* Splash screen - fullscreen native style */
+        /* Splash screen - абсолютно на весь экран */
         #splash {
             position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
+            right: 0;
+            bottom: 0;
             background: #70c5ce;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             z-index: 1000;
+            margin: 0;
+            padding: 0;
         }
         
         #splash img {
-            width: 120px;
-            height: 120px;
+            width: 100%;
+            max-width: 120px;
+            height: auto;
             margin-bottom: 16px;
         }
         
@@ -49,7 +55,6 @@
             margin: 0;
         }
         
-        /* Hide splash after load */
         #splash.hidden {
             display: none;
         }
@@ -57,10 +62,11 @@
         #app {
             width: 100%;
             height: 100%;
-            display: none; /* Initially hidden */
+            display: none;
             flex-direction: column;
             justify-content: center;
             align-items: center;
+            background: #70c5ce;
             padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
         }
         
@@ -68,6 +74,7 @@
             display: flex;
         }
         
+        /* Остальные стили остаются без изменений */
         #gamesMenu {
             display: none;
             flex-direction: column;
@@ -116,13 +123,13 @@
     </style>
 </head>
 <body>
-    <!-- Splash screen - shown immediately -->
+    <!-- Сплеш-скрин -->
     <div id="splash">
         <img src="ZM.png" alt="Zero Emission Logo">
         <h1>Zero Emission</h1>
     </div>
     
-    <!-- Main app content (initially hidden) -->
+    <!-- Основное содержимое приложения -->
     <div id="app">
         <h1>Zer0 Emission</h1>
         <button class="btn btn-play" id="playBtn">Играть в игры</button>
@@ -171,6 +178,7 @@
             tg.ready();
             activateFullscreen();
             
+            // Блокировка скролла
             document.body.addEventListener('touchmove', (e) => {
                 if (!e.target.classList.contains('scrollable')) {
                     e.preventDefault();
@@ -185,12 +193,13 @@
             const splash = document.getElementById('splash');
             const app = document.getElementById('app');
 
-            // Hide splash screen after short delay (simulating app load)
+            // Скрыть сплеш-скрин через 1 секунду
             setTimeout(() => {
                 splash.classList.add('hidden');
                 app.classList.add('visible');
-            }, 1000); // 1 second splash screen
+            }, 1000);
 
+            // Обработчики событий кнопок
             playBtn.addEventListener('click', () => {
                 document.querySelectorAll('#app > button').forEach(btn => {
                     btn.style.display = 'none';
