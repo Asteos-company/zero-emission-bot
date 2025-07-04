@@ -20,7 +20,7 @@
             overflow: hidden;
             position: fixed;
             touch-action: none;
-            background: white; /* Белый фон */
+            background: white;
         }
 
         /* Fullscreen splash image */
@@ -54,7 +54,7 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            background: white; /* Белый фон */
+            background: white;
             padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
         }
 
@@ -62,7 +62,12 @@
             display: flex;
         }
 
-        /* Остальные стили остаются без изменений */
+        .logo {
+            width: 200px;
+            height: auto;
+            margin-bottom: 30px;
+        }
+
         #gamesMenu {
             display: none;
             flex-direction: column;
@@ -82,9 +87,9 @@
         }
 
         .btn-play {
-            background: #bef761; /* Новый цвет кнопки */
+            background: #bef761;
             box-shadow: 0 4px 0 #9acd32;
-            color: #333; /* Темный текст для лучшей читаемости */
+            color: #333;
         }
 
         .btn-support {
@@ -103,9 +108,9 @@
             margin-top: 20px;
         }
 
-        h1, h2 {
-            color: #333; /* Темный текст для белого фона */
-            text-shadow: none; /* Убрали тень для лучшей читаемости */
+        h2 {
+            color: #333;
+            text-shadow: none;
             margin-bottom: 24px;
             text-align: center;
         }
@@ -119,8 +124,9 @@
 
     <!-- Основное содержимое приложения -->
     <div id="app">
-        <h1>Zer0 Emission</h1>
-        <button class="btn btn-play" id="playBtn">Игры</button> <!-- Измененный текст кнопки -->
+        <!-- Заменили текст на логотип -->
+        <img src="ZE_logo.png" alt="Zero Emission Logo" class="logo">
+        <button class="btn btn-play" id="playBtn">Игры</button>
         <button class="btn btn-support" id="supportBtn">Связаться с поддержкой</button>
 
         <div id="gamesMenu">
@@ -145,7 +151,7 @@
 
             tg.BackButton.hide();
             tg.MainButton.hide();
-            tg.setBackgroundColor('#ffffff'); /* Белый фон для Telegram */
+            tg.setBackgroundColor('#ffffff');
 
             if (tg.platform === 'ios') {
                 document.body.style.overflow = 'hidden';
