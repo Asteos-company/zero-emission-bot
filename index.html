@@ -18,41 +18,28 @@
             width: 100vw;
             height: 100vh;
             overflow: hidden;
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
             position: fixed;
             touch-action: none;
         }
         
-        /* Splash screen - абсолютно на весь экран */
+        /* Fullscreen splash image */
         #splash {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: #70c5ce;
+            background: #000;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
             z-index: 1000;
-            margin: 0;
-            padding: 0;
         }
         
         #splash img {
             width: 100%;
-            max-width: 120px;
-            height: auto;
-            margin-bottom: 16px;
-        }
-        
-        #splash h1 {
-            color: white;
-            font-size: 24px;
-            font-weight: 600;
-            text-shadow: 0 1px 3px rgba(0,0,0,0.2);
-            margin: 0;
+            height: 100%;
+            object-fit: cover;
         }
         
         #splash.hidden {
@@ -123,10 +110,9 @@
     </style>
 </head>
 <body>
-    <!-- Сплеш-скрин -->
+    <!-- Сплеш-скрин (только изображение) -->
     <div id="splash">
-        <img src="ZM.png" alt="Zero Emission Logo">
-        <h1>Zero Emission</h1>
+        <img src="https://s3-alpha.figma.com/hub/file/3989027226/9a8f9c7d-6a4b-4d8b-a9d2-5d5e5b5d5e5b-cover.png" alt="Splash Screen">
     </div>
     
     <!-- Основное содержимое приложения -->
