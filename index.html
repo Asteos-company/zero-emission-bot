@@ -20,6 +20,7 @@
             overflow: hidden;
             position: fixed;
             touch-action: none;
+            background: white; /* Белый фон */
         }
         
         /* Fullscreen splash image */
@@ -53,7 +54,7 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            background: #70c5ce;
+            background: white; /* Белый фон */
             padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
         }
         
@@ -81,8 +82,9 @@
         }
         
         .btn-play {
-            background: linear-gradient(to bottom, #FF9500, #FF5E00);
-            box-shadow: 0 4px 0 #CC4B00;
+            background: #bef761; /* Новый цвет кнопки */
+            box-shadow: 0 4px 0 #9acd32;
+            color: #333; /* Темный текст для лучшей читаемости */
         }
         
         .btn-support {
@@ -102,8 +104,8 @@
         }
         
         h1, h2 {
-            color: white;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            color: #333; /* Темный текст для белого фона */
+            text-shadow: none; /* Убрали тень для лучшей читаемости */
             margin-bottom: 24px;
             text-align: center;
         }
@@ -112,13 +114,13 @@
 <body>
     <!-- Сплеш-скрин (только изображение) -->
     <div id="splash">
-        <img src="ZM.png" alt="Splash Screen">
+        <img src="https://s3-alpha.figma.com/hub/file/3989027226/9a8f9c7d-6a4b-4d8b-a9d2-5d5e5b5d5e5b-cover.png" alt="Splash Screen">
     </div>
     
     <!-- Основное содержимое приложения -->
     <div id="app">
         <h1>Zer0 Emission</h1>
-        <button class="btn btn-play" id="playBtn">Играть в игры</button>
+        <button class="btn btn-play" id="playBtn">Поиграть в игры</button> <!-- Измененный текст кнопки -->
         <button class="btn btn-support" id="supportBtn">Связаться с поддержкой</button>
         
         <div id="gamesMenu">
@@ -143,7 +145,7 @@
             
             tg.BackButton.hide();
             tg.MainButton.hide();
-            tg.setBackgroundColor('#70c5ce');
+            tg.setBackgroundColor('#ffffff'); /* Белый фон для Telegram */
             
             if (tg.platform === 'ios') {
                 document.body.style.overflow = 'hidden';
