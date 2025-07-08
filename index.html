@@ -168,6 +168,18 @@
         #app.visible .btn:nth-child(1) { animation-delay: 0.1s; }
         #app.visible .btn:nth-child(2) { animation-delay: 0.2s; }
         #gamesMenu .btn { animation-delay: 0s !important; }
+        
+        /* Стиль для iframe с игрой */
+        .game-frame {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+            z-index: 1001;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -189,6 +201,10 @@
             <button class="btn btn-back" id="backBtn">Назад</button>
         </div>
     </div>
+
+    <!-- Фреймы для игр (изначально скрыты) -->
+    <iframe class="game-frame" id="clumsyBirdFrame" src="about:blank"></iframe>
+    <iframe class="game-frame" id="pacmanFrame" src="about:blank"></iframe>
 
     <script>
         const tg = window.Telegram.WebApp;
@@ -214,31 +230,31 @@
             }
         }
 
-        function openGame(url) {
-            // Показываем кнопку "Назад" вместо кнопки "Закрыть"
+        function openGame(url, frameId) {
+            // Показываем кнопку "Назад"
             tg.BackButton.show();
-            tg.BackButton.onClick(() => {
-                tg.BackButton.hide();
-                window.location.reload();
-            });
             
-            // Открываем игру в iframe или новом окне
-            const gameFrame = document.createElement('iframe');
-            gameFrame.src = url;
-            gameFrame.style.position = 'fixed';
-            gameFrame.style.top = '0';
-            gameFrame.style.left = '0';
-            gameFrame.style.width = '100%';
-            gameFrame.style.height = '100%';
-            gameFrame.style.border = 'none';
-            gameFrame.style.zIndex = '1000';
-            gameFrame.style.backgroundColor = '#000';
-            
-            document.body.appendChild(gameFrame);
-            
-            // Скрываем основное меню
+            // Скрываем основное меню и показываем игру
             document.getElementById('app').style.display = 'none';
             document.getElementById('splash').style.display = 'none';
+            
+            const gameFrame = document.getElementById(frameId);
+            gameFrame.src = url;
+            gameFrame.style.display = 'block';
+        }
+
+        function closeGame(frameId) {
+            // Скрываем игру
+            const gameFrame = document.getElementById(frameId);
+            gameFrame.src = 'about:blank';
+            gameFrame.style.display = 'none';
+            
+            // Показываем меню выбора игр
+            document.getElementById('gamesMenu').style.display = 'flex';
+            document.getElementById('app').style.display = 'flex';
+            
+            // Скрываем кнопку "Назад"
+            tg.BackButton.hide();
         }
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -283,11 +299,11 @@
             });
 
             game2048Btn.addEventListener('click', () => {
-                openGame('https://izhenergo.github.io/Clumsy_Bird/');
+                openGame('https://izhenergo.github.io/Clumsy_Bird/', 'clumsyBirdFrame');
             });
 
             Pacman_Canvas_ShortBtn.addEventListener('click', () => {
-                openGame('https://izhenergo.github.io/Pacman_Canvas/');
+                openGame('https://izhenergo.github.io/Pacman_Canvas/', 'pacmanFrame');
             });
 
             supportBtn.addEventListener('click', () => {
@@ -296,11 +312,17 @@
             
             // Обработчик кнопки "Назад" в Telegram
             tg.BackButton.onClick(() => {
-                // Если игра открыта в iframe - закрываем её
-                const iframe = document.querySelector('iframe');
-                if (iframe) {
-                    iframe.remove();
-                    app.style.display = 'flex';
+                // Проверяем, какая игра сейчас открыта
+                if (document.getElementById('clumsyBirdFrame').style.display === 'block') {
+                    closeGame('clumsyBirdFrame');
+                } else if (document.getElementById('pacmanFrame').style.display === 'block') {
+                    closeGame('pacmanFrame');
+                } else if (gamesMenu.style.display === 'flex') {
+                    // Если открыто меню игр - возвращаемся на главный экран
+                    gamesMenu.style.display = 'none';
+                    document.querySelectorAll('#app > button').forEach(btn => {
+                        btn.style.display = 'block';
+                    });
                     tg.BackButton.hide();
                 }
             });
