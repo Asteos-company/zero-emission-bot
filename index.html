@@ -196,7 +196,7 @@
         function activateFullscreen() {
             tg.enableClosingConfirmation();
             tg.setHeaderColor('secondary_bg_color');
-
+            
             if (tg.requestFullscreen) {
                 tg.requestFullscreen();
             } else {
@@ -214,12 +214,31 @@
             }
         }
 
-        function openGameDirectly(url) {
-            if (tg && tg.openGame) {
-                tg.openGame('game_2048');
-                return;
-            }
-            window.location.href = url;
+        function openGame(url) {
+            // Показываем кнопку "Назад" вместо кнопки "Закрыть"
+            tg.BackButton.show();
+            tg.BackButton.onClick(() => {
+                tg.BackButton.hide();
+                window.location.reload();
+            });
+            
+            // Открываем игру в iframe или новом окне
+            const gameFrame = document.createElement('iframe');
+            gameFrame.src = url;
+            gameFrame.style.position = 'fixed';
+            gameFrame.style.top = '0';
+            gameFrame.style.left = '0';
+            gameFrame.style.width = '100%';
+            gameFrame.style.height = '100%';
+            gameFrame.style.border = 'none';
+            gameFrame.style.zIndex = '1000';
+            gameFrame.style.backgroundColor = '#000';
+            
+            document.body.appendChild(gameFrame);
+            
+            // Скрываем основное меню
+            document.getElementById('app').style.display = 'none';
+            document.getElementById('splash').style.display = 'none';
         }
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -264,15 +283,26 @@
             });
 
             game2048Btn.addEventListener('click', () => {
-                openGameDirectly('https://izhenergo.github.io/Clumsy_Bird/');
+                openGame('https://izhenergo.github.io/Clumsy_Bird/');
             });
 
             Pacman_Canvas_ShortBtn.addEventListener('click', () => {
-                openGameDirectly('https://izhenergo.github.io/Pacman_Canvas/');
+                openGame('https://izhenergo.github.io/Pacman_Canvas/');
             });
 
             supportBtn.addEventListener('click', () => {
                 tg.openTelegramLink('https://t.me/MobileApps18');
+            });
+            
+            // Обработчик кнопки "Назад" в Telegram
+            tg.BackButton.onClick(() => {
+                // Если игра открыта в iframe - закрываем её
+                const iframe = document.querySelector('iframe');
+                if (iframe) {
+                    iframe.remove();
+                    app.style.display = 'flex';
+                    tg.BackButton.hide();
+                }
             });
         });
     </script>
