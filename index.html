@@ -150,14 +150,12 @@
             <h2>Выберите игру</h2>
             <button class="btn btn-game" id="clumsyBirdBtn">Clumsy Bird</button>
             <button class="btn btn-game" id="pacmanBtn">Pacman Canvas</button>
-            <button class="btn btn-game" id="racerBtn">Pseudo 3D Racer</button>
             <button class="btn btn-back" id="backBtn">Назад</button>
         </div>
     </div>
 
     <iframe class="game-frame" id="clumsyBirdFrame" allow="fullscreen" src="about:blank"></iframe>
     <iframe class="game-frame" id="pacmanFrame" allow="fullscreen" src="about:blank"></iframe>
-    <iframe class="game-frame" id="racerFrame" allow="fullscreen" src="about:blank"></iframe>
 
     <script>
         const tg = window.Telegram.WebApp;
@@ -198,7 +196,6 @@
             const gameUrls = {
                 clumsyBirdFrame: 'https://izhenergo.github.io/Clumsy_Bird/',
                 pacmanFrame: 'https://izhenergo.github.io/Pacman_Canvas/',
-                racerFrame: 'https://codeincomplete.com/games/racer/v4-final/'
             };
 
             document.getElementById('app').style.display = 'none';
@@ -231,7 +228,6 @@
             
             document.getElementById('clumsyBirdBtn').addEventListener('click', () => openGame('clumsyBirdFrame'));
             document.getElementById('pacmanBtn').addEventListener('click', () => openGame('pacmanFrame'));
-            document.getElementById('racerBtn').addEventListener('click', () => openGame('racerFrame'));
 
             // Блокировка скролла
             document.body.addEventListener('touchmove', (e) => {
