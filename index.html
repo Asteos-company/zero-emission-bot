@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Zer0 Emission Games</title>
@@ -24,7 +24,6 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         }
 
-        /* Fullscreen splash image */
         #splash {
             position: fixed;
             top: 0;
@@ -76,7 +75,6 @@
             width: 100%;
         }
 
-        /* Улучшенные стили кнопок */
         .btn {
             width: 280px;
             height: 56px;
@@ -92,51 +90,30 @@
             transition: transform 0.1s ease, box-shadow 0.2s ease;
             position: relative;
             overflow: hidden;
-            will-change: transform;
         }
 
         .btn:active {
-            transform: scale(0.96) !important;
-        }
-
-        .btn::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.2);
-            opacity: 0;
-            transition: opacity 0.2s ease;
-        }
-
-        .btn:hover::after {
-            opacity: 1;
+            transform: scale(0.96);
         }
 
         .btn-play {
             background: #bef761;
             color: #1a1a1a;
-            box-shadow: 0 4px 12px rgba(190, 247, 97, 0.3);
         }
 
         .btn-support {
             background: #007AFF;
             color: white;
-            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
         }
 
         .btn-game {
             background: #34C759;
             color: white;
-            box-shadow: 0 4px 12px rgba(52, 199, 89, 0.3);
         }
 
         .btn-back {
             background: #FF3B30;
             color: white;
-            box-shadow: 0 4px 12px rgba(255, 59, 48, 0.3);
             margin-top: 24px;
         }
 
@@ -148,28 +125,6 @@
             text-align: center;
         }
 
-        /* Улучшенная анимация появления */
-        @keyframes fadeInUp {
-            from { 
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to { 
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        #app.visible .btn {
-            animation: fadeInUp 0.5s cubic-bezier(0.2, 0.8, 0.4, 1) forwards;
-            opacity: 0;
-        }
-
-        #app.visible .btn:nth-child(1) { animation-delay: 0.1s; }
-        #app.visible .btn:nth-child(2) { animation-delay: 0.2s; }
-        #gamesMenu .btn { animation-delay: 0s !important; }
-        
-        /* Стиль для iframe с игрой */
         .game-frame {
             position: fixed;
             top: 0;
@@ -179,16 +134,15 @@
             border: none;
             z-index: 1001;
             display: none;
+            background: #000;
         }
     </style>
 </head>
 <body>
-    <!-- Сплеш-скрин -->
     <div id="splash">
         <img alt="Splash Screen" src="ZM.png">
     </div>
 
-    <!-- Основное содержимое приложения -->
     <div id="app">
         <img src="ZE_logo.png" alt="Zero Emission Logo" class="logo">
         <button class="btn btn-play" id="playBtn">Игры</button>
@@ -196,72 +150,92 @@
 
         <div id="gamesMenu">
             <h2>Выберите игру</h2>
-            <button class="btn btn-game" id="game2048">Clumsy Bird</button>
-            <button class="btn btn-game" id="Pacman_Canvas_Short">Pacman Canvas</button>
-            <button class="btn btn-game" id="gamePseudo_3D_Racer">Pseudo 3D Racer</button>
+            <button class="btn btn-game" id="clumsyBirdBtn">Clumsy Bird</button>
+            <button class="btn btn-game" id="pacmanBtn">Pacman Canvas</button>
+            <button class="btn btn-game" id="racerBtn">Pseudo 3D Racer</button>
             <button class="btn btn-back" id="backBtn">Назад</button>
         </div>
     </div>
 
-    <!-- Фреймы для игр (изначально скрыты) -->
-    <iframe class="game-frame" id="clumsyBirdFrame" src="about:blank"></iframe>
-    <iframe class="game-frame" id="pacmanFrame" src="about:blank"></iframe>
-    <iframe class="game-frame" id="Pseudo3DRacerFrame" src="about:blank"></iframe>
+    <iframe class="game-frame" id="clumsyBirdFrame" allow="fullscreen" src="about:blank"></iframe>
+    <iframe class="game-frame" id="pacmanFrame" allow="fullscreen" src="about:blank"></iframe>
+    <iframe class="game-frame" id="racerFrame" allow="fullscreen" src="about:blank"></iframe>
 
     <script>
         const tg = window.Telegram.WebApp;
 
-        function activateFullscreen() {
-            tg.enableClosingConfirmation();
-            tg.setHeaderColor('secondary_bg_color');
-            
-            if (tg.requestFullscreen) {
-                tg.requestFullscreen();
-            } else {
-                tg.expand();
-            }
+        // Инициализация WebApp
+        tg.ready();
+        tg.expand();
+        tg.enableClosingConfirmation();
+        tg.BackButton.hide();
 
-            tg.BackButton.hide();
-            tg.MainButton.hide();
-            tg.setBackgroundColor('#ffffff');
+        // Состояние приложения
+        let currentGameFrame = null;
 
-            if (tg.platform === 'ios') {
-                document.body.style.overflow = 'hidden';
-                document.documentElement.style.overflow = 'hidden';
-                window.scrollTo(0, 0);
-            }
-        }
-
-        function openGame(url, frameId) {
-            // Показываем кнопку "Назад"
-            tg.BackButton.show();
-            
-            // Скрываем основное меню и показываем игру
-            document.getElementById('app').style.display = 'none';
-            document.getElementById('splash').style.display = 'none';
-            
-            const gameFrame = document.getElementById(frameId);
-            gameFrame.src = url;
-            gameFrame.style.display = 'block';
-        }
-
-        function closeGame(frameId) {
-            // Скрываем игру
-            const gameFrame = document.getElementById(frameId);
-            gameFrame.src = 'about:blank';
-            gameFrame.style.display = 'none';
-            
-            // Показываем меню выбора игр
-            document.getElementById('gamesMenu').style.display = 'flex';
+        function showMainMenu() {
             document.getElementById('app').style.display = 'flex';
-            
-            // Скрываем кнопку "Назад"
+            document.getElementById('gamesMenu').style.display = 'none';
+            document.querySelectorAll('#app > button').forEach(btn => {
+                btn.style.display = 'block';
+            });
             tg.BackButton.hide();
         }
 
+        function showGamesMenu() {
+            document.querySelectorAll('#app > button').forEach(btn => {
+                btn.style.display = 'none';
+            });
+            document.getElementById('gamesMenu').style.display = 'flex';
+            tg.BackButton.hide();
+        }
+
+        function openGame(frameId) {
+            const gameUrls = {
+                clumsyBirdFrame: 'https://izhenergo.github.io/Clumsy_Bird/',
+                pacmanFrame: 'https://izhenergo.github.io/Pacman_Canvas/',
+                racerFrame: 'https://codeincomplete.com/games/racer/v4-final/'
+            };
+
+            currentGameFrame = frameId;
+            document.getElementById('app').style.display = 'none';
+            const frame = document.getElementById(frameId);
+            frame.src = gameUrls[frameId];
+            frame.style.display = 'block';
+            
+            tg.BackButton.show();
+            tg.BackButton.onClick(closeCurrentGame);
+        }
+
+        function closeCurrentGame() {
+            if (!currentGameFrame) return;
+            
+            const frame = document.getElementById(currentGameFrame);
+            frame.src = 'about:blank';
+            frame.style.display = 'none';
+            currentGameFrame = null;
+            
+            showGamesMenu();
+        }
+
+        // Инициализация
         document.addEventListener('DOMContentLoaded', () => {
-            tg.ready();
-            activateFullscreen();
+            // Скрыть сплеш через 1.5 секунды
+            setTimeout(() => {
+                document.getElementById('splash').classList.add('hidden');
+                document.getElementById('app').classList.add('visible');
+            }, 1500);
+
+            // Назначение обработчиков
+            document.getElementById('playBtn').addEventListener('click', showGamesMenu);
+            document.getElementById('backBtn').addEventListener('click', showMainMenu);
+            document.getElementById('supportBtn').addEventListener('click', () => {
+                tg.openTelegramLink('https://t.me/MobileApps18');
+            });
+            
+            document.getElementById('clumsyBirdBtn').addEventListener('click', () => openGame('clumsyBirdFrame'));
+            document.getElementById('pacmanBtn').addEventListener('click', () => openGame('pacmanFrame'));
+            document.getElementById('racerBtn').addEventListener('click', () => openGame('racerFrame'));
 
             // Блокировка скролла
             document.body.addEventListener('touchmove', (e) => {
@@ -269,72 +243,6 @@
                     e.preventDefault();
                 }
             }, { passive: false });
-
-            const playBtn = document.getElementById('playBtn');
-            const supportBtn = document.getElementById('supportBtn');
-            const backBtn = document.getElementById('backBtn');
-            const game2048Btn = document.getElementById('game2048');
-            const Pacman_Canvas_ShortBtn = document.getElementById('Pacman_Canvas_Short')
-            const Pseudo_3D_RacerBtn = document.getElementById('Pseudo_3D_Racer')
-            const gamesMenu = document.getElementById('gamesMenu');
-            const splash = document.getElementById('splash');
-            const app = document.getElementById('app');
-
-            // Скрыть сплеш-скрин через 1,5 секунды
-            setTimeout(() => {
-                splash.classList.add('hidden');
-                app.classList.add('visible');
-            }, 1500);
-
-            // Обработчики событий кнопок
-            playBtn.addEventListener('click', () => {
-                document.querySelectorAll('#app > button').forEach(btn => {
-                    btn.style.display = 'none';
-                });
-                gamesMenu.style.display = 'flex';
-            });
-
-            backBtn.addEventListener('click', () => {
-                gamesMenu.style.display = 'none';
-                document.querySelectorAll('#app > button').forEach(btn => {
-                    btn.style.display = 'block';
-                });
-            });
-
-            game2048Btn.addEventListener('click', () => {
-                openGame('https://izhenergo.github.io/Clumsy_Bird/', 'clumsyBirdFrame');
-            });
-
-            Pacman_Canvas_ShortBtn.addEventListener('click', () => {
-                openGame('https://izhenergo.github.io/Pacman_Canvas/', 'pacmanFrame');
-            });
-
-            Pseudo_3D_RacerBtn.addEventListener('click', () => {
-                openGame('https://codeincomplete.com/games/racer/v4-final/', 'Pseudo3DRacerFrame');
-            });
-
-            supportBtn.addEventListener('click', () => {
-                tg.openTelegramLink('https://t.me/MobileApps18');
-            });
-            
-            // Обработчик кнопки "Назад" в Telegram
-            tg.BackButton.onClick(() => {
-                // Проверяем, какая игра сейчас открыта
-                if (document.getElementById('clumsyBirdFrame').style.display === 'block') {
-                    closeGame('clumsyBirdFrame');
-                } else if (document.getElementById('pacmanFrame').style.display === 'block') {
-                    closeGame('pacmanFrame');
-                } else if (document.getElementById('Pseudo3DRacerFrame').style.display === 'block') {
-                    closeGame('Pseudo3DRacerFrame');
-                } else if (gamesMenu.style.display === 'flex') {
-                    // Если открыто меню игр - возвращаемся на главный экран
-                    gamesMenu.style.display = 'none';
-                    document.querySelectorAll('#app > button').forEach(btn => {
-                        btn.style.display = 'block';
-                    });
-                    tg.BackButton.hide();
-                }
-            });
         });
     </script>
 </body>
