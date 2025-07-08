@@ -87,9 +87,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: transform 0.1s ease, box-shadow 0.2s ease;
-            position: relative;
-            overflow: hidden;
+            transition: transform 0.1s ease;
         }
 
         .btn:active {
@@ -163,6 +161,8 @@
 
     <script>
         const tg = window.Telegram.WebApp;
+        let currentView = 'main'; // 'main', 'games' или 'game'
+        let currentGameFrame = null;
 
         // Инициализация WebApp
         tg.ready();
@@ -170,10 +170,8 @@
         tg.enableClosingConfirmation();
         tg.BackButton.hide();
 
-        // Состояние приложения
-        let currentGameFrame = null;
-
         function showMainMenu() {
+            currentView = 'main';
             document.getElementById('app').style.display = 'flex';
             document.getElementById('gamesMenu').style.display = 'none';
             document.querySelectorAll('#app > button').forEach(btn => {
@@ -183,47 +181,45 @@
         }
 
         function showGamesMenu() {
+            currentView = 'games';
+            document.getElementById('app').style.display = 'flex';
             document.querySelectorAll('#app > button').forEach(btn => {
                 btn.style.display = 'none';
             });
             document.getElementById('gamesMenu').style.display = 'flex';
-            tg.BackButton.hide();
+            tg.BackButton.show();
+            tg.BackButton.onClick(showMainMenu);
         }
 
         function openGame(frameId) {
+            currentView = 'game';
+            currentGameFrame = frameId;
+            
             const gameUrls = {
                 clumsyBirdFrame: 'https://izhenergo.github.io/Clumsy_Bird/',
                 pacmanFrame: 'https://izhenergo.github.io/Pacman_Canvas/',
                 racerFrame: 'https://codeincomplete.com/games/racer/v4-final/'
             };
 
-            currentGameFrame = frameId;
             document.getElementById('app').style.display = 'none';
             const frame = document.getElementById(frameId);
             frame.src = gameUrls[frameId];
             frame.style.display = 'block';
             
             tg.BackButton.show();
-            tg.BackButton.onClick(closeCurrentGame);
-        }
-
-        function closeCurrentGame() {
-            if (!currentGameFrame) return;
-            
-            const frame = document.getElementById(currentGameFrame);
-            frame.src = 'about:blank';
-            frame.style.display = 'none';
-            currentGameFrame = null;
-            
-            showGamesMenu();
+            tg.BackButton.onClick(() => {
+                frame.src = 'about:blank';
+                frame.style.display = 'none';
+                showGamesMenu();
+            });
         }
 
         // Инициализация
         document.addEventListener('DOMContentLoaded', () => {
-            // Скрыть сплеш через 1.5 секунды
             setTimeout(() => {
                 document.getElementById('splash').classList.add('hidden');
                 document.getElementById('app').classList.add('visible');
+                showMainMenu();
             }, 1500);
 
             // Назначение обработчиков
@@ -239,9 +235,7 @@
 
             // Блокировка скролла
             document.body.addEventListener('touchmove', (e) => {
-                if (!e.target.classList.contains('scrollable')) {
-                    e.preventDefault();
-                }
+                e.preventDefault();
             }, { passive: false });
         });
     </script>
