@@ -198,6 +198,7 @@
             <h2>Выберите игру</h2>
             <button class="btn btn-game" id="game2048">Clumsy Bird</button>
             <button class="btn btn-game" id="Pacman_Canvas_Short">Pacman Canvas</button>
+            <button class="btn btn-game" id="gamePseudo_3D_Racer">Pseudo 3D Racer</button>
             <button class="btn btn-back" id="backBtn">Назад</button>
         </div>
     </div>
@@ -273,6 +274,7 @@
             const backBtn = document.getElementById('backBtn');
             const game2048Btn = document.getElementById('game2048');
             const Pacman_Canvas_ShortBtn = document.getElementById('Pacman_Canvas_Short')
+            const Pseudo_3D_RacerBtn = document.getElementById('Pseudo_3D_Racer')
             const gamesMenu = document.getElementById('gamesMenu');
             const splash = document.getElementById('splash');
             const app = document.getElementById('app');
@@ -304,6 +306,10 @@
 
             Pacman_Canvas_ShortBtn.addEventListener('click', () => {
                 openGame('https://izhenergo.github.io/Pacman_Canvas/', 'pacmanFrame');
+            });
+
+            Pseudo_3D_RacerBtn.addEventListener('click', () => {
+                openGame('https://codeincomplete.com/games/racer/v4-final/', 'Pseudo3DRacerFrame');
             });
 
             supportBtn.addEventListener('click', () => {
