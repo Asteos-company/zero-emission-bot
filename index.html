@@ -185,7 +185,7 @@
         <div id="gamesMenu">
             <h2>Выберите игру</h2>
             <button class="btn btn-game" id="game2048">Clumsy Bird</button>
-            <button class="btn btn-game" id="gameTicTacToe">Tic Tac Toe</button>
+            <button class="btn btn-game" id="Pacman_Canvas_Short">Pacman Canvas</button>
             <button class="btn btn-back" id="backBtn">Назад</button>
         </div>
     </div>
@@ -237,6 +237,7 @@
             const supportBtn = document.getElementById('supportBtn');
             const backBtn = document.getElementById('backBtn');
             const game2048Btn = document.getElementById('game2048');
+            const Pacman_Canvas_ShortBtn = document.getElementById('Pacman_Canvas_Short')
             const gamesMenu = document.getElementById('gamesMenu');
             const splash = document.getElementById('splash');
             const app = document.getElementById('app');
@@ -266,9 +267,9 @@
                 openGameDirectly('https://izhenergo.github.io/Clumsy_Bird/');
             });
 
-            gameTicTacToeBtn.addEventListener('click'), () => {
-                openGameDirectly('https://izhenergo.github.io/Tic_Tac_Toe/')
-            }
+            Pacman_Canvas_ShortBtn.addEventListener('click', () => {
+                openGameDirectly('https://izhenergo.github.io/Pacman_Canvas/');
+            });
 
             supportBtn.addEventListener('click', () => {
                 tg.openTelegramLink('https://t.me/MobileApps18');
