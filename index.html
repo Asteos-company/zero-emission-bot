@@ -95,12 +95,12 @@
         }
 
         .btn-play {
-            background: #bef761;
+            background: #EFEFEF;
             color: #1a1a1a;
         }
 
         .btn-support {
-            background: #007AFF;
+            background: #bef761;
             color: white;
         }
 
@@ -143,14 +143,13 @@
 
     <div id="app">
         <img src="ZE_logo.png" alt="Zero Emission Logo" class="logo">
+        <button class="btn btn-support" id="supportBtn">Техническая поддержка</button>
         <button class="btn btn-play" id="playBtn">Игры</button>
-        <button class="btn btn-support" id="supportBtn">Связаться с поддержкой</button>
 
         <div id="gamesMenu">
             <h2>Выберите игру</h2>
             <button class="btn btn-game" id="clumsyBirdBtn">Clumsy Bird</button>
             <button class="btn btn-game" id="pacmanBtn">Pacman Canvas</button>
-            <button class="btn btn-back" id="backBtn">Назад</button>
         </div>
     </div>
 
@@ -192,7 +191,7 @@
         function openGame(frameId) {
             currentView = 'game';
             currentGameFrame = frameId;
-            
+
             const gameUrls = {
                 clumsyBirdFrame: 'https://izhenergo.github.io/Clumsy_Bird/',
                 pacmanFrame: 'https://izhenergo.github.io/Pacman_Canvas/',
@@ -202,7 +201,7 @@
             const frame = document.getElementById(frameId);
             frame.src = gameUrls[frameId];
             frame.style.display = 'block';
-            
+
             tg.BackButton.show();
             tg.BackButton.onClick(() => {
                 frame.src = 'about:blank';
@@ -221,11 +220,10 @@
 
             // Назначение обработчиков
             document.getElementById('playBtn').addEventListener('click', showGamesMenu);
-            document.getElementById('backBtn').addEventListener('click', showMainMenu);
             document.getElementById('supportBtn').addEventListener('click', () => {
                 tg.openTelegramLink('https://t.me/MobileApps18');
             });
-            
+
             document.getElementById('clumsyBirdBtn').addEventListener('click', () => openGame('clumsyBirdFrame'));
             document.getElementById('pacmanBtn').addEventListener('click', () => openGame('pacmanFrame'));
 
